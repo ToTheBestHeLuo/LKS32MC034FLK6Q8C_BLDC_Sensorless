@@ -1,0 +1,20 @@
+lks32mc03x_periph_driver_V1.5
+fix(DAC): 为DAC量程添加配置选项，并添加DAC_OUTPUT函数
+
+lks32mc03x_periph_driver_V1.4
+更正lks32mc03x_MCPWM.c文件中CH3的P和N通道默认电平通道设置相反了，MCPWM_FAIL3的BIT9为CH3P的设置默认电平
+BIT8为CH3N的默认电平设置。
+
+lks32mc03x_periph_driver_V1.3
+增加定时器初始化使能接口，FuncState EN;      /*定时器模块使能*/（lks32mc03x.tim.h）。
+
+lks32mc03x_periph_driver_V1.2
+1、修改库函数备注。
+2、将定时器模块使能函数由结构体使能，变为调用使能函数进行定时器模块使能。
+
+lks32mc03x_periph_driver_V1.1
+1、增加芯片A或者B版本判断（主要DAC模块使用）。
+2、DAC模块增加3V和4.8V量程选择及其库函数内两个量程校正参数读取。
+
+lks32mc03x_periph_driver_V1.0
+修改lks32mc03x_hall.h内HALL结构体宏定义HALL0改为HALL。
