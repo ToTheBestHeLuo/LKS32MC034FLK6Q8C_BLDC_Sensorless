@@ -1,0 +1,2 @@
+# LKS32MC034FLK6Q8C_BLDC_Sensorless
+none
