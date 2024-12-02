@@ -107,7 +107,12 @@ void HALL_IRQHandler(void)
 		if(HALL->INFO & BIT17){
 			HALL->INFO |= BIT17;
 			BLDC_PWM_AllSides_TurnOff();
-			bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_RotorBlock;
+			
+			BLDC_RunMode runMode = bldcSysHandler.bldcSensorlessHandler.runMode;
+			if(runMode == eBLDC_Run_Mode_COMP_Polling)
+				bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_RotorBlock;
+			else if(runMode == eBLDC_Run_Mode_COMP_INT)
+				bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_Commutation;
 		}
 }
 

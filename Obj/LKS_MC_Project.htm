@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Obj\LKS_MC_Project.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Obj\LKS_MC_Project.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sun Dec 01 20:45:25 2024
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Mon Dec 02 13:52:16 2024
 <BR><P>
 <H3>Maximum Stack Usage =        176 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -332,7 +332,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[16]"></a>ADC_IRQHandler</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, interrupt.o(i.ADC_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = ADC_IRQHandler &rArr; BLDC_LowSpeedTask &rArr; BLDC_SysReset
+<BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = ADC_IRQHandler &rArr; BLDC_LowSpeedTask &rArr; __ARM_common_switch8
 </UL>
 <BR>[Calls]<UL><LI><a href="#[3f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_LowSpeedTask
 <LI><a href="#[3d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ADC_GetIRQFlag
@@ -362,7 +362,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[3f]"></a>BLDC_LowSpeedTask</STRONG> (Thumb, 326 bytes, Stack size 24 bytes, bldcdriver.o(i.BLDC_LowSpeedTask))
-<BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = BLDC_LowSpeedTask &rArr; BLDC_SysReset
+<BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = BLDC_LowSpeedTask &rArr; __ARM_common_switch8
 </UL>
 <BR>[Calls]<UL><LI><a href="#[45]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_SysReset
 <LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_PWM_TurnOff
@@ -373,7 +373,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[4d]"></a>BLDC_ZeroCrossCompTask</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, bldcdriver.o(i.BLDC_ZeroCrossCompTask))
-<BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = BLDC_ZeroCrossCompTask &rArr; BLDC_Run_Mode_COMP_Int
+<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = BLDC_ZeroCrossCompTask &rArr; BLDC_Run_Mode_COMP_Int
 </UL>
 <BR>[Calls]<UL><LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_Run_Mode_COMP_Int
 </UL>
@@ -381,7 +381,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[15]"></a>CMP_IRQHandler</STRONG> (Thumb, 24 bytes, Stack size 8 bytes, interrupt.o(i.CMP_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = CMP_IRQHandler &rArr; BLDC_ZeroCrossCompTask &rArr; BLDC_Run_Mode_COMP_Int
+<BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = CMP_IRQHandler &rArr; BLDC_ZeroCrossCompTask &rArr; BLDC_Run_Mode_COMP_Int
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_ZeroCrossCompTask
 </UL>
@@ -488,7 +488,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[60]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Hardware_init
 </UL>
 
-<P><STRONG><a name="[13]"></a>HALL_IRQHandler</STRONG> (Thumb, 50 bytes, Stack size 0 bytes, interrupt.o(i.HALL_IRQHandler))
+<P><STRONG><a name="[13]"></a>HALL_IRQHandler</STRONG> (Thumb, 64 bytes, Stack size 0 bytes, interrupt.o(i.HALL_IRQHandler))
 <BR>[Address Reference Count : 1]<UL><LI> startup_lks32mc03x.o(RESET)
 </UL>
 <P><STRONG><a name="[5d]"></a>HALL_Init</STRONG> (Thumb, 76 bytes, Stack size 8 bytes, lks32mc03x_hall.o(i.HALL_Init))
@@ -757,8 +757,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[4a]"></a>BLDC_COMP_Int_SetPolarity_Low</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, bldcdriver.o(i.BLDC_COMP_Int_SetPolarity_Low))
-<BR><BR>[Called By]<UL><LI><a href="#[45]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_SysReset
-<LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_Run_Mode_COMP_Int
+<BR><BR>[Called By]<UL><LI><a href="#[48]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_Run_Mode_COMP_Int
 </UL>
 
 <P><STRONG><a name="[4b]"></a>BLDC_COMP_Int_TurnOn</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, bldcdriver.o(i.BLDC_COMP_Int_TurnOn))
@@ -804,8 +803,8 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> bldcdriver.o(.data)
 </UL>
-<P><STRONG><a name="[48]"></a>BLDC_Run_Mode_COMP_Int</STRONG> (Thumb, 178 bytes, Stack size 24 bytes, bldcdriver.o(i.BLDC_Run_Mode_COMP_Int))
-<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = BLDC_Run_Mode_COMP_Int
+<P><STRONG><a name="[48]"></a>BLDC_Run_Mode_COMP_Int</STRONG> (Thumb, 132 bytes, Stack size 16 bytes, bldcdriver.o(i.BLDC_Run_Mode_COMP_Int))
+<BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = BLDC_Run_Mode_COMP_Int
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_COMP_Int_TurnOn
 <LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_COMP_Int_SetPolarity_Low
@@ -814,7 +813,7 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_ZeroCrossCompTask
 </UL>
 
-<P><STRONG><a name="[43]"></a>BLDC_Run_Mode_COMP_Polling</STRONG> (Thumb, 368 bytes, Stack size 24 bytes, bldcdriver.o(i.BLDC_Run_Mode_COMP_Polling))
+<P><STRONG><a name="[43]"></a>BLDC_Run_Mode_COMP_Polling</STRONG> (Thumb, 340 bytes, Stack size 24 bytes, bldcdriver.o(i.BLDC_Run_Mode_COMP_Polling))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = BLDC_Run_Mode_COMP_Polling
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_Run_Mode_COMP_Polling_Commutation
@@ -828,12 +827,8 @@ Local Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_Run_Mode_COMP_Polling
 </UL>
 
-<P><STRONG><a name="[45]"></a>BLDC_SysReset</STRONG> (Thumb, 58 bytes, Stack size 8 bytes, bldcdriver.o(i.BLDC_SysReset))
-<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = BLDC_SysReset
-</UL>
-<BR>[Calls]<UL><LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_COMP_Int_SetPolarity_Low
-</UL>
-<BR>[Called By]<UL><LI><a href="#[3f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_LowSpeedTask
+<P><STRONG><a name="[45]"></a>BLDC_SysReset</STRONG> (Thumb, 90 bytes, Stack size 0 bytes, bldcdriver.o(i.BLDC_SysReset))
+<BR><BR>[Called By]<UL><LI><a href="#[3f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_LowSpeedTask
 </UL>
 <P>
 <H3>

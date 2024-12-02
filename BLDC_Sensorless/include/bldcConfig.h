@@ -14,10 +14,12 @@
 #define BLDC_Min_PWM_Count (-900)
 /*在这里设定启动时的定位需要多少个Cycle*/
 #define BLDC_Startup_Alignment_Cycle (400)
-/*在这里设定启动时的初始PWM值和初始时以及最终的周期Cycle，其中Cycle乘以Period为启动时实际时间*/
+/*在这里设定启动时的初始PWM值和初始时以及最终的周期Cycle*/
 #define BLDC_Startup_PWM_Count (-900)
 #define BLDC_Startup_Initial_Cycle (100)
 #define BLDC_Startup_Final_Cycle (20)
+/*在这里设定启动成功后占空比（油门）的响应速度，需要注意的是值不能太低，这会导致过高的响应速度，并可能导致换相错误*/
+#define BLDC_StartCompleted_SpeedUpLimit (10u)
 /*在这里设定母线欠电压和过电压保护时的值*/
 #define BLDC_Bus_UnderVoltage_Protect (1000u)
 #define BLDC_Bus_OverVoltage_Protect (2000u)
@@ -39,11 +41,17 @@ STI bool BLDC_GPIO_MotorControl(void)
 
 /*====================与HALL计数器相关的函数设定）=======================*/
 
-/*在这里设定HALL计数器溢出上限的函数*/
-STI void BLDC_HALL_SetThreshold(void)
+/*在这里设定HALL计数器溢出上限的函数，高阈值检测窗口*/
+STI void BLDC_HALL_SetThreshold_High(void)
 {
 		//设定检测窗口为50Hz，也就是20ms，当20ms内没重置HALL的计数器，则认为产生了一次堵转事件
 		HALL->TH = 960000 - 1;
+}
+/*在这里设定HALL计数器溢出上限的函数，低阈值检测窗口*/
+STI void BLDC_HALL_SetThreshold_Low(void)
+{
+		//设定检测窗口为1200Hz，也就是0.833ms，当0.833ms内没重置HALL的计数器，则认为产生了一次换相错误事件
+		HALL->TH = 40000 - 1;
 }
 /*在这里设定打开HALL计数器溢出中断的函数*/
 STI void BLDC_HALL_OverFlowInt_TurnOn(void)

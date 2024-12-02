@@ -1,6 +1,7 @@
 #include "bldcConfig.h"
 
-void (*BLDC_SwitchTableCW[])(uint16_t pwmCount) = {
+/*正转换相表*/
+static void (*BLDC_SwitchTableCW[])(uint16_t pwmCount) = {
 		BLDC_PWM_UH_VL,
 		BLDC_PWM_UH_WL,
 		BLDC_PWM_VH_WL,
@@ -8,8 +9,8 @@ void (*BLDC_SwitchTableCW[])(uint16_t pwmCount) = {
 		BLDC_PWM_WH_UL,
 		BLDC_PWM_WH_VL
 };
-
-void (*BLDC_SwitchTableCCW[])(uint16_t pwmCount) = {
+/*反转换相表*/
+static void (*BLDC_SwitchTableCCW[])(uint16_t pwmCount) = {
 		BLDC_PWM_UH_VL,
 		BLDC_PWM_WH_VL,
 		BLDC_PWM_WH_UL,
@@ -17,6 +18,8 @@ void (*BLDC_SwitchTableCCW[])(uint16_t pwmCount) = {
 		BLDC_PWM_VH_WL,
 		BLDC_PWM_UH_WL
 };
+/*实际使用的换相表*/
+static void (*BLDC_SwitchTable[6])(uint16_t pwmCount);
 
 BLDC_SysHandler bldcSysHandler;
 
@@ -49,18 +52,16 @@ static bool BLDC_Run_Mode_COMP_Polling_Commutation(void)
  *******************************************************************************/
 static void BLDC_Run_Mode_COMP_Polling(void)
 {
-		bool cwccw = bldcSysHandler.bldcSensorlessHandler.CWCCW;
 		switch(bldcSysHandler.bldcSensorlessHandler.runStatus){
 			case eBLDC_Run_Alignment:
-				BLDC_SwitchTableCW[0]((uint16_t)BLDC_Startup_PWM_Count);
+				BLDC_SwitchTable[0]((uint16_t)BLDC_Startup_PWM_Count);
 				if(bldcSysHandler.highSpeedCounter++ > 500){
 					bldcSysHandler.highSpeedCounter = 0u;
 					bldcSysHandler.bldcSensorlessHandler.runStatus = eBLDC_Run_SpeedUp;
 				}
 				break;
 			case eBLDC_Run_SpeedUp:
-				if(cwccw) BLDC_SwitchTableCW[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)BLDC_Startup_PWM_Count);
-				else BLDC_SwitchTableCCW[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)BLDC_Startup_PWM_Count);
+				BLDC_SwitchTable[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)BLDC_Startup_PWM_Count);
 				if(bldcSysHandler.highSpeedCounter++ > bldcSysHandler.bldcSensorlessHandler.speedUpCycle){
 					bldcSysHandler.highSpeedCounter = 0u;
 					bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
@@ -69,7 +70,7 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 						bldcSysHandler.counter = 0u;
 						
 						/*在这里打开电机的堵转保护功能*/
-						BLDC_HALL_SetThreshold();
+						BLDC_HALL_SetThreshold_High();
 						BLDC_HALL_ResetCounter();
 						BLDC_HALL_OverFlowInt_TurnOn();
 						
@@ -78,8 +79,7 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 				}
 				break;
 			case eBLDC_Run_OpenLoop:
-				if(cwccw) BLDC_SwitchTableCW[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)BLDC_Startup_PWM_Count);
-				else BLDC_SwitchTableCCW[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)BLDC_Startup_PWM_Count);
+				BLDC_SwitchTable[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)BLDC_Startup_PWM_Count);
 				if(bldcSysHandler.highSpeedCounter++ > bldcSysHandler.bldcSensorlessHandler.speedUpCycle){
 					bldcSysHandler.highSpeedCounter = 0u;
 					bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
@@ -89,8 +89,7 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 					bldcSysHandler.counter = 0u;
 					bldcSysHandler.highSpeedCounter = 0u;
 					bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
-					if(cwccw) BLDC_SwitchTableCW[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)BLDC_Startup_PWM_Count);
-					else BLDC_SwitchTableCCW[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)BLDC_Startup_PWM_Count);
+					BLDC_SwitchTable[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)BLDC_Startup_PWM_Count);
 					bldcSysHandler.bldcSensorlessHandler.runStatus = eBLDC_Run_ReadyForCloseLoop;
 				}
 				break;
@@ -99,8 +98,7 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 					BLDC_HALL_ResetCounter();
 					bldcSysHandler.counter++;
 					bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
-					if(cwccw) BLDC_SwitchTableCW[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)BLDC_Startup_PWM_Count);
-					else BLDC_SwitchTableCCW[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)BLDC_Startup_PWM_Count);
+					BLDC_SwitchTable[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)BLDC_Startup_PWM_Count);
 				}
 				if(bldcSysHandler.counter == 255){
 					bldcSysHandler.counter = 0u;
@@ -108,6 +106,8 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 					bldcSysHandler.bldcSensorlessHandler.runMode = eBLDC_Run_Mode_COMP_INT;
 					BLDC_PWM_Int_TurnOff();
 					CMP->IF = (BIT0 | BIT1);
+					BLDC_HALL_ResetCounter();
+					BLDC_HALL_SetThreshold_Low();
 					BLDC_COMP_Int_TurnOn();
 				}
 				break;
@@ -125,30 +125,19 @@ static void BLDC_Run_Mode_COMP_Polling(void)
  *******************************************************************************/
 static void BLDC_Run_Mode_COMP_Int(void)
 {
-		static bool commutationError = false;
 	
-		bool cwccw = bldcSysHandler.bldcSensorlessHandler.CWCCW;
 		bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
-		if(cwccw) BLDC_SwitchTableCW[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)bldcSysHandler.bldcSensorlessHandler.pwmCount);
-		else BLDC_SwitchTableCCW[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)bldcSysHandler.bldcSensorlessHandler.pwmCount);
-		BLDC_COMP_GetPolarity() ? BLDC_COMP_Int_SetPolarity_Low() : BLDC_COMP_Int_SetPolarity_High();
-	
-		bool comp = BLDC_COMP_GetData_Filter();
-	
-		if(commutationError != comp && bldcSysHandler.highSpeedCounter++ > 10){
-			bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_Commutation;
-		}else{
-			commutationError = comp;
-		}
-	
+		BLDC_SwitchTable[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)bldcSysHandler.bldcSensorlessHandler.pwmCount);
 	
 		bldcSysHandler.bldcSensorlessHandler.commutationTime = BLDC_HALL_GetCounter();
 		BLDC_HALL_ResetCounter();
 	
-		if(bldcSysHandler.bldcSensorlessHandler.pwmCount < bldcSysHandler.bldcSensorlessHandler.pwmCountTarget && bldcSysHandler.counter++ == 10u){
+		BLDC_COMP_GetPolarity() ? BLDC_COMP_Int_SetPolarity_Low() : BLDC_COMP_Int_SetPolarity_High();
+	
+		if(bldcSysHandler.bldcSensorlessHandler.pwmCount < bldcSysHandler.bldcSensorlessHandler.pwmCountTarget && bldcSysHandler.counter++ > BLDC_StartCompleted_SpeedUpLimit){
 			bldcSysHandler.counter = 0u;
 			bldcSysHandler.bldcSensorlessHandler.pwmCount++;
-		}else if(bldcSysHandler.bldcSensorlessHandler.pwmCount > bldcSysHandler.bldcSensorlessHandler.pwmCountTarget && bldcSysHandler.counter++ == 10u){
+		}else if(bldcSysHandler.bldcSensorlessHandler.pwmCount > bldcSysHandler.bldcSensorlessHandler.pwmCountTarget && bldcSysHandler.counter++ > BLDC_StartCompleted_SpeedUpLimit){
 			bldcSysHandler.counter = 0u;
 			bldcSysHandler.bldcSensorlessHandler.pwmCount--;
 		}
@@ -178,7 +167,7 @@ static void BLDC_SysReset(void)
 		bldcSysHandler.bldcSensorlessHandler.speedUpCycle = BLDC_Startup_Initial_Cycle;
 		bldcSysHandler.bldcSensorlessHandler.pwmCount = BLDC_Startup_PWM_Count;
 		bldcSysHandler.bldcSensorlessHandler.pwmCountTarget = BLDC_Startup_PWM_Count;
-		bldcSysHandler.bldcSensorlessHandler.CWCCW = false;
+		bldcSysHandler.bldcSensorlessHandler.CWCCW = true;
 		bldcSysHandler.bldcSensorlessHandler.comparePolarity = true;
 		bldcSysHandler.bldcSensorlessHandler.commutationTime = 0u;
 	
@@ -186,6 +175,22 @@ static void BLDC_SysReset(void)
 		bldcSysHandler.adcSensorHandler.adcDriverTemperatureValue = 0;
 		bldcSysHandler.adcSensorHandler.adcBusCurrent = 0;
 		bldcSysHandler.adcSensorHandler.adcBusCurrentOffset = 0;
+	
+		if(bldcSysHandler.bldcSensorlessHandler.CWCCW){
+			BLDC_SwitchTable[0] = BLDC_SwitchTableCW[0];
+			BLDC_SwitchTable[1] = BLDC_SwitchTableCW[1];
+			BLDC_SwitchTable[2] = BLDC_SwitchTableCW[2];
+			BLDC_SwitchTable[3] = BLDC_SwitchTableCW[3];
+			BLDC_SwitchTable[4] = BLDC_SwitchTableCW[4];
+			BLDC_SwitchTable[5] = BLDC_SwitchTableCW[5];
+		}else{
+			BLDC_SwitchTable[0] = BLDC_SwitchTableCCW[0];
+			BLDC_SwitchTable[1] = BLDC_SwitchTableCCW[1];
+			BLDC_SwitchTable[2] = BLDC_SwitchTableCCW[2];
+			BLDC_SwitchTable[3] = BLDC_SwitchTableCCW[3];
+			BLDC_SwitchTable[4] = BLDC_SwitchTableCCW[4];
+			BLDC_SwitchTable[5] = BLDC_SwitchTableCCW[5];
+		}
 
 	
 		if(bldcSysHandler.bldcSensorlessHandler.CWCCW) BLDC_COMP_Int_SetPolarity_High();
