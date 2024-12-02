@@ -7,7 +7,7 @@
 这部分内容包括有PGA（负责母线电流采样以及过流信号输出）、比较器1（负责过流信号触发急停保护事件）、比较器0（负责换相逻辑的检测）、HALL（负责换相时间的检测）、UTimer0（负责安全任务的调度）、UTimer1（负责协议的处理）、MCPWM（负责三相控制信号的生成以及电机启动任务的调度）、DAC（负责过流保护阈值）、TemperatrueSensor（负责温度检测）
 ## 中断说明
 ### 1.HALL中断
-当电机堵转时间超过20ms，会触发HALL中断，并将错误标志设置为eBLDC_Sys_Error_RotorBlock，进一步触发电机重启。
+当处在eBLDC_Run_Mode_COMP_Polling，当电机堵转时间超过20ms，会触发HALL中断，并将错误标志设置为eBLDC_Sys_Error_RotorBlock，进一步触发电机重启；而当处在eBLDC_Run_Mode_COMP_Int，当换相间隔超过0.833ms，则认为发生换相错误事件，从而触发电机重启。
 ### 2.MCPWM中断
 这里有刹车中断以及电机启动任务的调度中断。当电机出现过流，会触发刹车中断，并将错误标志设置为eBLDC_Sys_Error_DriverBrake，进一步触发电机重启。调度中断本质是定时器轮询，轮询任务仅当错误标志为eBLDC_Sys_Error_None且当前工作在eBLDC_Run_Mode_COMP_Polling模式时才会有效。
 ### 3.ADC中断
@@ -32,4 +32,4 @@
 ## 2024.12.1 
 第一次上传
 ## 2024.12.2
-
+更改
