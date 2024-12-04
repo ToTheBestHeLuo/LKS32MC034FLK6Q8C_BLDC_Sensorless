@@ -117,17 +117,19 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 }
 /*******************************************************************************
  函数名称：    static void BLDC_Run_Mode_COMP_Int(void)
- 功能描述：    无感BLDC六步换相系统工作在比较器中断模式，负责高速下速度闭环任务
+ 功能描述：    无感BLDC六步换相系统工作在比较器中断模式，用以确定过零点
  输入参数：    无         
  输出参数：    无
  返 回 值：    无
- 其它说明：    注意一个很关键的点
+ 其它说明：    无
  *******************************************************************************/
 static void BLDC_Run_Mode_COMP_Int(void)
 {
-	
 		bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
 		BLDC_SwitchTable[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)bldcSysHandler.bldcSensorlessHandler.pwmCount);
+	
+		BLDC_COMP_Int_TurnOff();
+		CMP->IF = 0x3;
 	
 		bldcSysHandler.bldcSensorlessHandler.commutationTime = BLDC_HALL_GetCounter();
 		BLDC_HALL_ResetCounter();
@@ -141,8 +143,7 @@ static void BLDC_Run_Mode_COMP_Int(void)
 			bldcSysHandler.counter = 0u;
 			bldcSysHandler.bldcSensorlessHandler.pwmCount--;
 		}
-		BLDC_COMP_Int_TurnOff();
-		CMP->IF = 0x3;
+
 		BLDC_COMP_Int_TurnOn();
 }
 /*******************************************************************************

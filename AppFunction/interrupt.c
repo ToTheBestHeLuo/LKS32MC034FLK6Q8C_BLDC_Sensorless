@@ -70,7 +70,7 @@ void MCPWM0_IRQHandler(void)
 			DAC_OutputVoltage(1.f * BIT12);  /* DAC 输出1.0V */
 		}
 		if(MCPWM0->PWM_IF0 & BIT13){
-			MCPWM0->PWM_IF0 |= BIT13;
+			MCPWM0->PWM_IF0 = BIT13;
 			BLDC_HighSpeedTask();
 		}
 //		GPIO_SetBits(GPIO1,GPIO_Pin_5);
@@ -105,9 +105,8 @@ void MCPWM1_IRQHandler(void)
 void HALL_IRQHandler(void)
 {
 		if(HALL->INFO & BIT17){
-			HALL->INFO |= BIT17;
+			HALL->INFO = BIT17;
 			BLDC_PWM_AllSides_TurnOff();
-			
 			BLDC_RunMode runMode = bldcSysHandler.bldcSensorlessHandler.runMode;
 			if(runMode == eBLDC_Run_Mode_COMP_Polling)
 				bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_RotorBlock;
@@ -178,7 +177,7 @@ void CMP_IRQHandler(void)
 {
 //		GPIO_ResetBits(GPIO1,GPIO_Pin_5);
 		if(CMP->IF & BIT0){
-			CMP->IF |= BIT0;
+			CMP->IF = BIT0;
 			BLDC_ZeroCrossCompTask();
 		}
 //		GPIO_SetBits(GPIO1,GPIO_Pin_5);

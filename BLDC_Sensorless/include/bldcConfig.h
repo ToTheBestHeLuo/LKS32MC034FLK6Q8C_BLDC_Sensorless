@@ -75,6 +75,11 @@ STI uint32_t BLDC_HALL_GetCounter(void)
 {
 		return HALL->CNT;
 }
+/*在这里设定HALL计数器溢出阈值的函数*/
+STI void BLDC_HALL_SetThreshold(uint32_t threshold)
+{
+		HALL->TH = threshold;
+}
 
 /*====================与COMP相关的函数设定=======================*/
 
@@ -298,6 +303,7 @@ extern BLDC_SysHandler bldcSysHandler;
 extern void BLDC_LowSpeedTask(void);
 extern void BLDC_HighSpeedTask(void);
 extern void BLDC_ZeroCrossCompTask(void);
+extern void BLDC_DelayCommutationTask(void);
 
 #endif
 
