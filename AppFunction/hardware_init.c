@@ -108,6 +108,8 @@ void Hardware_init(void)
 		PGA_init();                    		/* PGA初始化 */
 		ADC0_init();                   		/* ADC初始化 */
     MCPWM_init();                     /* MCPWM初始化 */
+	
+	  IWDG_init();                      /* 看门狗初始化*/
 	  delay_us(100);                    /* 延时等待硬件初始化稳定 */
 		
     NVIC_EnableIRQ(HALL_IRQn);      		/* 使能HALL中断 */
@@ -385,11 +387,11 @@ void ADC0_init(void)
     ADC_InitStructure.Align = ADC_LEFT_ALIGN;         /* ADC数据输出左对齐*/
     ADC_InitStructure.Trigger_Mode = ADC_1SEG_TRG;    /* 设置ADC转换模式为1段式采样 */
     ADC_InitStructure.FirSeg_Ch = ADC_3_TIMES_SAMPLE; /* 第一段共采样3个通道 */
-    ADC_InitStructure.Trigger_Cnt = 0;                /* 单段触发模式下触发一次采样所需要的事件数:
+    ADC_InitStructure.Trigger_Cnt = 15;                /* 单段触发模式下触发一次采样所需要的事件数:
                                                         0~15 0表示需要一次触发，15表示需要16次*/
     ADC_InitStructure.ADC_RANGE = ADC_RANGE_3V6;      /* ADC量程选择*/
-		ADC_InitStructure.SEL_En = ADC_UTIMER_TRG;				/*设置UTimer为触发来源*/
-    ADC_InitStructure.Trigger_En = ADC_HARDWARE_T0_TRG;  /* 开启硬件触发ADC采样使能 */
+		ADC_InitStructure.SEL_En = ADC_MCPWM_TRG;				/*设置UTimer为触发来源*/
+    ADC_InitStructure.Trigger_En = ADC_HARDWARE_T3_TRG;  /* 开启硬件触发ADC采样使能 */
     ADC_InitStructure.IE = ADC_EOS0_IRQ_EN;           /* 第一段扫描结束中断*/
     ADC_InitStructure.ADC_SAMP_CLK = 4;              /* 设置采样时间为20个ADC时钟周期 范围4--35*/
     ADC_Init(ADC, &ADC_InitStructure);
@@ -445,6 +447,7 @@ void MCPWM_init(void)
     MCPWM_InitStructure.TimeBase1_PERIOD = PWM_PERIOD;           /* 时期1周期设置 */
 		
     MCPWM_InitStructure.TriggerPoint3 = (u16)(-1100); 		/* MCPWM_TMR3 触发事件T3 设置 */
+		MCPWM_InitStructure.TMR3_TimeBase_Sel = 0;						/* 选择时基0作为TMR3事件的触发点*/ 
 		MCPWM_InitStructure.CNT0_TMR3_Match_INT_EN = ENABLE;	/* MCPWM_TMR3 时基0TMR3匹配中断 使能 */
 
     MCPWM_InitStructure.DeadTimeCH0123N = DEADTIME; /* CH0123N死区时间设置 */
@@ -519,7 +522,28 @@ void MCPWM_init(void)
     MCPWM_SwapFunction();
 		GPIO_SetBits(GPIO1,GPIO_Pin_1);
 }
-
+/*******************************************************************************
+ 函数名称：    void IWDG_init(void)
+ 功能描述：    看门狗初始化
+ 输入参数：    无
+ 输出参数：    无
+ 返 回 值：    无
+ 其它说明：
+ 修改日期      版本号          修改人            修改内容
+ -----------------------------------------------------------------------------
+ 2022/04/26    V1.0           YangZJ            创建
+ *******************************************************************************/
+void IWDG_init(void)
+{
+    IWDG_InitTypeDef IWDG_InitStruct;
+    IWDG_StrutInit(&IWDG_InitStruct);
+    IWDG_InitStruct.WDG_EN  = ENABLE;      //使能看门狗
+    IWDG_InitStruct.RTH     = SECOND2IWDGCNT(2.0);//设置看门狗
+    IWDG_InitStruct.DWK_EN  = DISABLE;     // 深度休眠定时唤醒关闭   
+    IWDG_InitStruct.WTH     = 0;           // 看门狗定时唤醒时间（21位计数器，但低12恒位0）
+    IWDG_Init(&IWDG_InitStruct);
+    IWDG_ENABLE();                         // 开启看门狗
+}
 /*******************************************************************************
  函数名称：    void DebugPWM_OutputFunction(void)
  功能描述：    PWM输出功能调试   输出25%占空比

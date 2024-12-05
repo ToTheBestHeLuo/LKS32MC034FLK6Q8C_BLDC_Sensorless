@@ -1,6 +1,6 @@
 Dependencies for Project 'LK_StdPeriph', Target 'Linko 03x Project': (DO NOT MODIFY !)
 CompilerVersion: 5060960::V5.06 update 7 (build 960)::.\ARMCC
-F (.\Kernal_Source\main.c)(0x674AB699)(--c99 --execute_only -c --cpu Cortex-M0 -g -O3 -Otime --apcs=interwork --split_sections -I .\Include -I .\Kernal_Source -I .\LKS32MC03x_Periph_Driver\include -I .\BLDC_Sensorless\include-I.\RTE\_Linko_03x_Project-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include-D__UVISION_VERSION="536" -D_RTE_ -DLKS32MC033H6Q8 -D_RTE_-o .\obj\main.o --omf_browse .\obj\main.crf --depend .\obj\main.d)
+F (.\Kernal_Source\main.c)(0x67513688)(--c99 --execute_only -c --cpu Cortex-M0 -g -O3 -Otime --apcs=interwork --split_sections -I .\Include -I .\Kernal_Source -I .\LKS32MC03x_Periph_Driver\include -I .\BLDC_Sensorless\include-I.\RTE\_Linko_03x_Project-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include-D__UVISION_VERSION="536" -D_RTE_ -DLKS32MC033H6Q8 -D_RTE_-o .\obj\main.o --omf_browse .\obj\main.crf --depend .\obj\main.d)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_lib.h)(0x6742CCD8)
 I (C:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include\lks32mc03x.h)(0x66D6DB88)
 I (C:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include\basic.h)(0x66D6DB88)
@@ -31,9 +31,9 @@ I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_sys.h   )(0x66D91708)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_timer.h )(0x66D91708)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_uart.h  )(0x66D91708)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_tmp.h   )(0x66D91708)
-I (.\Include\hardware_init.h)(0x674ABEBA)
+I (.\Include\hardware_init.h)(0x675134EF)
 I (.\Include\delay.h)(0x66D91708)
-F (.\AppFunction\hardware_init.c)(0x674FDD07)(--c99 --execute_only -c --cpu Cortex-M0 -g -O3 -Otime --apcs=interwork --split_sections -I .\Include -I .\Kernal_Source -I .\LKS32MC03x_Periph_Driver\include -I .\BLDC_Sensorless\include-I.\RTE\_Linko_03x_Project-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include-D__UVISION_VERSION="536" -D_RTE_ -DLKS32MC033H6Q8 -D_RTE_-o .\obj\hardware_init.o --omf_browse .\obj\hardware_init.crf --depend .\obj\hardware_init.d)
+F (.\AppFunction\hardware_init.c)(0x67514141)(--c99 --execute_only -c --cpu Cortex-M0 -g -O3 -Otime --apcs=interwork --split_sections -I .\Include -I .\Kernal_Source -I .\LKS32MC03x_Periph_Driver\include -I .\BLDC_Sensorless\include-I.\RTE\_Linko_03x_Project-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include-D__UVISION_VERSION="536" -D_RTE_ -DLKS32MC033H6Q8 -D_RTE_-o .\obj\hardware_init.o --omf_browse .\obj\hardware_init.crf --depend .\obj\hardware_init.d)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_lib.h)(0x6742CCD8)
 I (C:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include\lks32mc03x.h)(0x66D6DB88)
 I (C:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include\basic.h)(0x66D6DB88)
@@ -64,9 +64,9 @@ I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_sys.h   )(0x66D91708)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_timer.h )(0x66D91708)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_uart.h  )(0x66D91708)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_tmp.h   )(0x66D91708)
-I (.\Include\hardware_init.h)(0x674ABEBA)
+I (.\Include\hardware_init.h)(0x675134EF)
 I (.\Include\delay.h)(0x66D91708)
-F (.\AppFunction\interrupt.c)(0x674FDAC0)(--c99 --execute_only -c --cpu Cortex-M0 -g -O3 -Otime --apcs=interwork --split_sections -I .\Include -I .\Kernal_Source -I .\LKS32MC03x_Periph_Driver\include -I .\BLDC_Sensorless\include-I.\RTE\_Linko_03x_Project-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include-D__UVISION_VERSION="536" -D_RTE_ -DLKS32MC033H6Q8 -D_RTE_-o .\obj\interrupt.o --omf_browse .\obj\interrupt.crf --depend .\obj\interrupt.d)
+F (.\AppFunction\interrupt.c)(0x67513FB7)(--c99 --execute_only -c --cpu Cortex-M0 -g -O3 -Otime --apcs=interwork --split_sections -I .\Include -I .\Kernal_Source -I .\LKS32MC03x_Periph_Driver\include -I .\BLDC_Sensorless\include-I.\RTE\_Linko_03x_Project-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include-D__UVISION_VERSION="536" -D_RTE_ -DLKS32MC033H6Q8 -D_RTE_-o .\obj\interrupt.o --omf_browse .\obj\interrupt.crf --depend .\obj\interrupt.d)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_lib.h)(0x6742CCD8)
 I (C:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include\lks32mc03x.h)(0x66D6DB88)
 I (C:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include\basic.h)(0x66D6DB88)
@@ -97,8 +97,8 @@ I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_sys.h   )(0x66D91708)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_timer.h )(0x66D91708)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_uart.h  )(0x66D91708)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_tmp.h   )(0x66D91708)
-I (.\Include\hardware_init.h)(0x674ABEBA)
-I (.\BLDC_Sensorless\include\bldcConfig.h)(0x674FDAB1)
+I (.\Include\hardware_init.h)(0x675134EF)
+I (.\BLDC_Sensorless\include\bldcConfig.h)(0x6751415E)
 F (.\AppFunction\delay.c)(0x66D91708)(--c99 --execute_only -c --cpu Cortex-M0 -g -O3 -Otime --apcs=interwork --split_sections -I .\Include -I .\Kernal_Source -I .\LKS32MC03x_Periph_Driver\include -I .\BLDC_Sensorless\include-I.\RTE\_Linko_03x_Project-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include-D__UVISION_VERSION="536" -D_RTE_ -DLKS32MC033H6Q8 -D_RTE_-o .\obj\delay.o --omf_browse .\obj\delay.crf --depend .\obj\delay.d)
 I (.\Include\delay.h)(0x66D91708)
 I (C:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include\basic.h)(0x66D6DB88)
@@ -660,11 +660,11 @@ I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_timer.h )(0x66D91708)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_uart.h  )(0x66D91708)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_tmp.h   )(0x66D91708)
 F (.\LKS32MC03x_Periph_Driver\Source\lks32mc03x_nvr.lib)(0x66D91708)()
-F (.\LKS32MC03x_Periph_Driver\Source\startup_lks32mc03x.s)(0x674FE359)(--cpu Cortex-M0 -g --apcs=interwork -I.\RTE\_Linko_03x_Project-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include--pd "__UVISION_VERSION SETA 536" --pd "_RTE_ SETA 1" --pd "LKS32MC033H6Q8 SETA 1" --pd "_RTE_ SETA 1"--list .\list\startup_lks32mc03x.lst --xref -o .\obj\startup_lks32mc03x.o --depend .\obj\startup_lks32mc03x.d)
-F (.\BLDC_Sensorless\source\bldcDriver.c)(0x674FDD6F)(--c99 --execute_only -c --cpu Cortex-M0 -g -O3 -Otime --apcs=interwork --split_sections -I .\Include -I .\Kernal_Source -I .\LKS32MC03x_Periph_Driver\include -I .\BLDC_Sensorless\include-I.\RTE\_Linko_03x_Project-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include-D__UVISION_VERSION="536" -D_RTE_ -DLKS32MC033H6Q8 -D_RTE_-o .\obj\bldcdriver.o --omf_browse .\obj\bldcdriver.crf --depend .\obj\bldcdriver.d)
-I (.\BLDC_Sensorless\include\bldcConfig.h)(0x674FDAB1)
+F (.\LKS32MC03x_Periph_Driver\Source\startup_lks32mc03x.s)(0x67503228)(--cpu Cortex-M0 -g --apcs=interwork -I.\RTE\_Linko_03x_Project-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include--pd "__UVISION_VERSION SETA 536" --pd "_RTE_ SETA 1" --pd "LKS32MC033H6Q8 SETA 1" --pd "_RTE_ SETA 1"--list .\list\startup_lks32mc03x.lst --xref -o .\obj\startup_lks32mc03x.o --depend .\obj\startup_lks32mc03x.d)
+F (.\BLDC_Sensorless\source\bldcDriver.c)(0x675141B4)(--c99 --execute_only -c --cpu Cortex-M0 -g -O3 -Otime --apcs=interwork --split_sections -I .\Include -I .\Kernal_Source -I .\LKS32MC03x_Periph_Driver\include -I .\BLDC_Sensorless\include-I.\RTE\_Linko_03x_Project-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include-D__UVISION_VERSION="536" -D_RTE_ -DLKS32MC033H6Q8 -D_RTE_-o .\obj\bldcdriver.o --omf_browse .\obj\bldcdriver.crf --depend .\obj\bldcdriver.d)
+I (.\BLDC_Sensorless\include\bldcConfig.h)(0x6751415E)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x6025237E)
-I (.\Include\hardware_init.h)(0x674ABEBA)
+I (.\Include\hardware_init.h)(0x675134EF)
 I (.\LKS32MC03x_Periph_Driver\include\lks32mc03x_lib.h)(0x6742CCD8)
 I (C:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include\lks32mc03x.h)(0x66D6DB88)
 I (C:\Keil_v5\ARM\PACK\Linko\LKS03x\1.1.7\Device\Include\basic.h)(0x66D6DB88)

@@ -27,12 +27,12 @@
  *******************************************************************************/
 void ADC_IRQHandler(void)
 {
-//		GPIO_ResetBits(GPIO1,GPIO_Pin_5);
+		GPIO_ResetBits(GPIO1,GPIO_Pin_5);
 		if(ADC_GetIRQFlag(ADC,ADC_EOS0_IRQ_EN)){  /*判断是否ADC第一段采样完成中断*/
 			ADC_ClearIRQFlag(ADC,ADC_EOS0_IRQ_IF);/*清除ADC第一段采样完成中断标志位*/
 			BLDC_LowSpeedTask();
 		}
-//		GPIO_SetBits(GPIO1,GPIO_Pin_5);
+		GPIO_SetBits(GPIO1,GPIO_Pin_5);
 }
 
 /*******************************************************************************

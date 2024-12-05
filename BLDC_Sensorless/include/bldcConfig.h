@@ -11,11 +11,11 @@
 
 /*在这里设定BLDC的最大以及最小PWM值*/
 #define BLDC_Max_PWM_Count (+1100)
-#define BLDC_Min_PWM_Count (-900)
+#define BLDC_Min_PWM_Count (-1000)
 /*在这里设定启动时的定位需要多少个Cycle*/
 #define BLDC_Startup_Alignment_Cycle (400)
 /*在这里设定启动时的初始PWM值和初始时以及最终的周期Cycle*/
-#define BLDC_Startup_PWM_Count (-900)
+#define BLDC_Startup_PWM_Count (-1000)
 #define BLDC_Startup_Initial_Cycle (100)
 #define BLDC_Startup_Final_Cycle (20)
 /*在这里设定启动成功后占空比（油门）的响应速度，需要注意的是值不能太低，这会导致过高的响应速度，并可能导致换相错误*/

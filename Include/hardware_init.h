@@ -51,6 +51,7 @@ void TempSensor_init(void);
 void PGA_init(void);
 void ADC0_init(void);
 void MCPWM_init(void);
+void IWDG_init(void);
 void SoftDelay(u32 cnt);
 uint8_t Invers_GPIO(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin);
 

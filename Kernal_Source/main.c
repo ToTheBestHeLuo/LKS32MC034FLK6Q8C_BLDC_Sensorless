@@ -41,10 +41,11 @@
 -----------------------------------------------------------------------------
  2022/4/14     V1.0          HuangMG             创建
  *******************************************************************************/
- strPWM_DutyCycleDef  strPWM_DutyCycle;
 int main(void)
 {
 	Hardware_init(); /* 硬件初始化 */
+	
+	strPWM_DutyCycleDef  strPWM_DutyCycle;
 
 	strPWM_DutyCycle.th00 = -PWM_PERIOD;
 	strPWM_DutyCycle.th01 = -PWM_PERIOD;
@@ -67,7 +68,8 @@ int main(void)
 	PWMOutputs(MCPWM0, ENABLE);
 	for (;;)
 	{
-			
+		IWDG_Feed();//看门狗喂狗
+		delay_ms(500);
 	}
 }
 

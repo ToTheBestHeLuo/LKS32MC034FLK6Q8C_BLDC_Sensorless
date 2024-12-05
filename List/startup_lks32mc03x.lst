@@ -154,19 +154,19 @@ ARM Macro Assembler    Page 3
   121 000000B8 00000000        DCD              0           ;
   122 000000BC 00000000        DCD              0           ;
   123 000000C0         
-  124 000000C0         ;user add
-  125 000000C0 00000000        DCD              0           ;
-  126 000000C4 00000000        DCD              0           ;
-  127 000000C8 00000000        DCD              0           ;
-  128 000000CC 00000000        DCD              0           ;
-  129 000000D0         
-  130 000000D0         __Vectors_End
-  131 000000D0         
-  132 000000D0 000000D0 
+  124 000000C0         ;    ;user add
+  125 000000C0         ;    DCD  0;
+  126 000000C0         ;    DCD  0;
+  127 000000C0         ;    DCD  0;
+  128 000000C0         ;    DCD  0;
+  129 000000C0         
+  130 000000C0         __Vectors_End
+  131 000000C0         
+  132 000000C0 000000C0 
                        __Vectors_Size
                                EQU              __Vectors_End - __Vectors
-  133 000000D0         
-  134 000000D0                 AREA             |.text|, CODE, READONLY
+  133 000000C0         
+  134 000000C0                 AREA             |.text|, CODE, READONLY
   135 00000000         
   136 00000000         ; Reset handler routine
   137 00000000         Reset_Handler
@@ -429,7 +429,7 @@ Symbol: __Vectors
       At line 54 in file LKS32MC03x_Periph_Driver\Source\startup_lks32mc03x.s
       At line 132 in file LKS32MC03x_Periph_Driver\Source\startup_lks32mc03x.s
 
-__Vectors_End 000000D0
+__Vectors_End 000000C0
 
 Symbol: __Vectors_End
    Definitions
@@ -700,7 +700,7 @@ Symbol: Stack_Size
       At line 33 in file LKS32MC03x_Periph_Driver\Source\startup_lks32mc03x.s
       At line 235 in file LKS32MC03x_Periph_Driver\Source\startup_lks32mc03x.s
 
-__Vectors_Size 000000D0
+__Vectors_Size 000000C0
 
 Symbol: __Vectors_Size
    Definitions
