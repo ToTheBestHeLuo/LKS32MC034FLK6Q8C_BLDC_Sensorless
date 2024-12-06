@@ -34,3 +34,4 @@
 .\obj\interrupt.o: .\LKS32MC03x_Periph_Driver\include\lks32mc03x_tmp.h   
 .\obj\interrupt.o: .\Include\hardware_init.h
 .\obj\interrupt.o: .\BLDC_Sensorless\include\bldcConfig.h
+.\obj\interrupt.o: .\protocol\include\protocol.h

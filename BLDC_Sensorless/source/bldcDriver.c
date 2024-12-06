@@ -25,7 +25,7 @@ BLDC_SysHandler bldcSysHandler;
 
 /*******************************************************************************
  函数名称：    static bool BLDC_Run_Mode_COMP_Polling_Commutation(void)
- 功能描述：    轮询模式下，无感BLDC六步换相系统的过零检测函数，当返回true表示需要立即换相，当返回false时表示无需换相，此外，自动设置比较器的中断触发极型
+ 功能描述：    轮询模式下，无感BLDC六步换相系统的过零检测函数，当返回true表示需要立即换相，当返回false时表示无需换相
  输入参数：    无         
  输出参数：    无
  返 回 值：    无
@@ -95,6 +95,7 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 				break;
 			case eBLDC_Run_ReadyForCloseLoop:
 				if(BLDC_Run_Mode_COMP_Polling_Commutation()){
+					bldcSysHandler.bldcSensorlessHandler.commutationTime = BLDC_HALL_GetCounter();
 					BLDC_HALL_ResetCounter();
 					bldcSysHandler.counter++;
 					bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
@@ -103,6 +104,7 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 				if(bldcSysHandler.counter == 255){
 					bldcSysHandler.counter = 0u;
 					BLDC_COMP_SetFilter_HighDelay();
+					bldcSysHandler.bldcSensorlessHandler.comparePolarity ? BLDC_COMP_Int_SetPolarity_Low() : BLDC_COMP_Int_SetPolarity_High();
 					bldcSysHandler.bldcSensorlessHandler.runMode = eBLDC_Run_Mode_COMP_INT;
 					BLDC_PWM_Int_TurnOff();
 					CMP->IF = (BIT0 | BIT1);
@@ -167,7 +169,7 @@ static void BLDC_SysReset(void)
 		bldcSysHandler.bldcSensorlessHandler.runMode = eBLDC_Run_Mode_Wait;
 		bldcSysHandler.bldcSensorlessHandler.speedUpCycle = BLDC_Startup_Initial_Cycle;
 		bldcSysHandler.bldcSensorlessHandler.pwmCount = BLDC_Startup_PWM_Count;
-		bldcSysHandler.bldcSensorlessHandler.pwmCountTarget = BLDC_Startup_PWM_Count;
+		bldcSysHandler.bldcSensorlessHandler.pwmCountTarget = 1100;
 		bldcSysHandler.bldcSensorlessHandler.CWCCW = true;
 		bldcSysHandler.bldcSensorlessHandler.comparePolarity = true;
 		bldcSysHandler.bldcSensorlessHandler.commutationTime = 0u;
@@ -192,10 +194,6 @@ static void BLDC_SysReset(void)
 			BLDC_SwitchTable[4] = BLDC_SwitchTableCCW[4];
 			BLDC_SwitchTable[5] = BLDC_SwitchTableCCW[5];
 		}
-
-	
-		if(bldcSysHandler.bldcSensorlessHandler.CWCCW) BLDC_COMP_Int_SetPolarity_High();
-		else BLDC_COMP_Int_SetPolarity_Low();
 }
 /*******************************************************************************
  函数名称：    void BLDC_LowSpeedTask(void)
@@ -208,6 +206,7 @@ static void BLDC_SysReset(void)
 void BLDC_LowSpeedTask(void)
 {
 		static int32_t busCurrentOffset = 0;
+		static uint16_t busErrorCnt = 0u,tempErrorCnt = 0u;
 		BLDC_SysStatus status = bldcSysHandler.sysStatus;
 		bldcSysHandler.adcSensorHandler.adcBusVoltageValue = BLDC_GetBusVoltage();
 		bldcSysHandler.adcSensorHandler.adcDriverTemperatureValue = BLDC_GetDriverTemperature();
@@ -219,19 +218,22 @@ void BLDC_LowSpeedTask(void)
 				BLDC_HALL_OverFlowInt_TurnOff();
 				busCurrentOffset = 0;
 				BLDC_SysReset();
-				bldcSysHandler.sysStatus = eBLDC_Sys_WaitBus;
+				bldcSysHandler.sysStatus = eBLDC_Sys_WaitBusAndTemp;
 				break;
-			case eBLDC_Sys_WaitBus:
-				if(bldcSysHandler.adcSensorHandler.adcBusVoltageValue > BLDC_Bus_UnderVoltage_Protect && bldcSysHandler.adcSensorHandler.adcBusVoltageValue < BLDC_Bus_OverVoltage_Protect){
+			case eBLDC_Sys_WaitBusAndTemp:
+				if(bldcSysHandler.adcSensorHandler.adcBusVoltageValue > BLDC_Bus_UnderVoltage_Protect &&  \
+						bldcSysHandler.adcSensorHandler.adcBusVoltageValue < BLDC_Bus_OverVoltage_Protect && \
+						!BLDC_TEMP_Temperature_TooHigh(bldcSysHandler.adcSensorHandler.adcDriverTemperatureValue) && \
+						!BLDC_TEMP_Temperature_TooLow(bldcSysHandler.adcSensorHandler.adcDriverTemperatureValue)){
 					if(bldcSysHandler.lowSpeedCounter++ > 500u){
 						BLDC_PWM_TurnOn();
 						BLDC_PWM_LowSides_TurnOn();
 						bldcSysHandler.lowSpeedCounter = 0u;
-						bldcSysHandler.sysStatus = eBLDC_Sys_WaitCap;
+						bldcSysHandler.sysStatus = eBLDC_Sys_WaitCapCharge;
 					}
 				}else bldcSysHandler.lowSpeedCounter = 0u;
 				break;
-			case eBLDC_Sys_WaitCap:
+			case eBLDC_Sys_WaitCapCharge:
 				busCurrentOffset += bldcSysHandler.adcSensorHandler.adcBusCurrent;
 				if(bldcSysHandler.lowSpeedCounter++ > 127){
 					bldcSysHandler.adcSensorHandler.adcBusCurrentOffset = busCurrentOffset / 128;
@@ -248,12 +250,25 @@ void BLDC_LowSpeedTask(void)
 				break;
 			case eBLDC_Sys_Polling:
 				if(bldcSysHandler.adcSensorHandler.adcBusVoltageValue < BLDC_Bus_UnderVoltage_Protect || bldcSysHandler.adcSensorHandler.adcBusVoltageValue > BLDC_Bus_OverVoltage_Protect){
-					if(bldcSysHandler.lowSpeedCounter++ > 100u){
+					if(busErrorCnt++ > 100u){
 						BLDC_PWM_TurnOff();
-						bldcSysHandler.lowSpeedCounter = 0u;
+						bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_Bus;
+						busErrorCnt = 0u;
 						bldcSysHandler.sysStatus = eBLDC_Sys_Reset;
 					}
-				}else bldcSysHandler.lowSpeedCounter = 0u;
+				}else busErrorCnt = 0u;
+				
+				if(BLDC_TEMP_Temperature_TooHigh(bldcSysHandler.adcSensorHandler.adcDriverTemperatureValue)){
+					if(tempErrorCnt++ > 100u){
+						BLDC_PWM_TurnOff();
+						bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_Temp;
+						tempErrorCnt = 0u;
+						bldcSysHandler.sysStatus = eBLDC_Sys_Reset;
+					}
+				}else if(BLDC_TEMP_Temperature_TooLow(bldcSysHandler.adcSensorHandler.adcDriverTemperatureValue)){
+					/*程序不应当跑入这里，暂时也没考虑如此低的工作温度*/
+					while(1);
+				}else tempErrorCnt = 0u;
 				
 				if(!BLDC_GPIO_MotorControl()){
 					BLDC_PWM_TurnOff();

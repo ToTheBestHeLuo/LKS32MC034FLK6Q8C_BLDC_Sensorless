@@ -34,3 +34,4 @@
 .\obj\main.o: .\LKS32MC03x_Periph_Driver\include\lks32mc03x_tmp.h   
 .\obj\main.o: .\Include\hardware_init.h
 .\obj\main.o: .\Include\delay.h
+.\obj\main.o: .\protocol\include\protocol.h

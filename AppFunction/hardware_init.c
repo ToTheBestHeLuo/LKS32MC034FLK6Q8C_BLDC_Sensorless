@@ -14,6 +14,7 @@
 #include "hardware_init.h"
 #include "delay.h"
 
+#include "protocol.h"
 /*******************************************************************************
  函数名称：    u8 OPA_CommonVoltageCorrection(void)
  功能描述：    利用硬件的比较器CMP1和DAC完成OPA输出的共模电压的自校正
@@ -109,21 +110,27 @@ void Hardware_init(void)
 		ADC0_init();                   		/* ADC初始化 */
     MCPWM_init();                     /* MCPWM初始化 */
 	
-	  IWDG_init();                      /* 看门狗初始化*/
+//	  IWDG_init();                      /* 看门狗初始化*/
 	  delay_us(100);                    /* 延时等待硬件初始化稳定 */
 		
     NVIC_EnableIRQ(HALL_IRQn);      		/* 使能HALL中断 */
     NVIC_SetPriority(HALL_IRQn, 0); 		/* 配置HALL中断优先级 */
 		
     NVIC_EnableIRQ(ADC_IRQn);      		/* 使能ADC中断 */
-    NVIC_SetPriority(ADC_IRQn, 2); 		/* 配置ADC中断优先级 */
+    NVIC_SetPriority(ADC_IRQn, 3); 		/* 配置ADC中断优先级 */
 		
     NVIC_EnableIRQ(CMP_IRQn);      		/* 使能COMP0中断 */
     NVIC_SetPriority(CMP_IRQn, 1); 		/* 配置COMP0优先级 */
 		
     NVIC_EnableIRQ(MCPWM0_IRQn);      		/* 使能MCPWM0中断 */
     NVIC_SetPriority(MCPWM0_IRQn, 0); 		/* 配置FMCPWM0优先级 */
-	
+		
+    NVIC_EnableIRQ(DMA_IRQn);      /* 使能 DMA_IRQn 外部中断*/
+    NVIC_SetPriority(DMA_IRQn,2); /* DMA_IRQn 外部中断优先级设置为1*/
+		
+    NVIC_EnableIRQ(TIMER1_IRQn);      /* 使能 TIMER1_IRQn 外部中断*/
+    NVIC_SetPriority(TIMER1_IRQn,2); /* TIMER1_IRQn 外部中断优先级设置为2*/
+		
 	  __enable_irq();                   /* 开启总中断 */
 }
 
@@ -180,10 +187,17 @@ void GPIO_init(void)
     GPIO_InitTypeDef GPIO_InitStruct;
     GPIO_StructInit(&GPIO_InitStruct);
 	
-		/*Debug专用的IO*/
+		/*Debug专用的IO1*/
 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5;
     GPIO_Init(GPIO1, &GPIO_InitStruct);
+	
+    /*P1.3 TIM1_CH0*/
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN; /*GPIO输入模式*/
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;     /*P1.3*/
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;  /*上拉功能*/
+    GPIO_Init(GPIO1, &GPIO_InitStruct);
+    GPIO_PinAFConfig(GPIO1, GPIO_PinSource_3, AF8_TIMER1); /*IO复用UTIMER功能*/
 	
 		/*按键触发Motor的IO*/
 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
@@ -249,6 +263,52 @@ void UTimer_init(void)
     TIM_InitStruct.TH = 48000 - 1;                  /* 设置计数器计数模值1KHz*/
     TIM_InitStruct.TIM_CMP0 = 24000;            /* 设置比较模式的CH0比较值 1KHz */
     TIM_TimerInit(TIMER0, &TIM_InitStruct);
+	
+    TIM_TimerStrutInit(&TIM_InitStruct); /* Timer结构体变量初始化 */
+	
+		TIM_ClearIRQFlag(TIMER1, TIM_IRQ_IF_CH0);
+		TIM_ClearIRQFlag(TIMER1, TIM_IRQ_IF_ZC);
+	
+		/*注意：CH1需要映射到一个物理IO，而CH0无需开启，只需要使用其比较功能即可*/
+		/*CH0作为比较模式，开启比较中断,当这个比较中断发生后重新设置比较值，同时关断比较中断，使能DMA传输，其中DMA触发信号是CH0的比较信号，比较值设置在DSHOT的Tick的1/2处*/
+		/*CH1用来捕获信号的周期脉宽，上升沿捕获，且发生捕获后自动清零CNT值*/
+	
+		/*当DMA传输完成以后，重新设置CH0的比较值，重新开启CH0的比较中断*/
+
+    TIM_TimerStrutInit(&TIM_InitStruct);        /* Timer结构体变量初始化 */
+	  TIM_InitStruct.CLK_DIV = TIM_Clk_Div1;      /* 设置Timer模块数据分频系数 */
+	
+    TIM_InitStruct.CH0_MODE = TIMER_OPMode_CMP; /* 设置Timer CH0为比较模式*/
+    TIM_InitStruct.TIM_CMP0 = 720;            	/* 设置比较模式的CH0比较值 */
+	
+    TIM_InitStruct.CH1_MODE = TIMER_OPMode_CAP; /* 设置Timer CH1为捕获模式*/
+    TIM_InitStruct.CH1_FE_CAP_EN = DISABLE;      /* 关闭Timer通道1下降沿捕获*/
+    TIM_InitStruct.CH1_RE_CAP_EN = ENABLE;     /* 使能Timer通道1上升沿捕获*/
+    TIM_InitStruct.SRC1 = TIM_SRC1_0;           /* 捕获模式通道1信号来源于Timer通道0的输入信号*/
+    TIM_InitStruct.CAP1_CLR_EN = ENABLE;       /* 当发生CAP1捕获事件时，清零Timer计数器*/
+    TIM_InitStruct.TH = 32767 * 32767 - 1;               			/* 设置计数器计数模值*/
+    TIM_InitStruct.FLT = 1;                     /* 通道 0/1 信号滤波宽度选择，0-255 */
+    
+    TIM_InitStruct.IE = TIM_IRQ_IE_CH0 | TIM_IRQ_RE_CH0;          /* 使能Timer模块CH0比较中断以及CH0的比较触发DMA请求*/
+    TIM_TimerInit(TIMER1, &TIM_InitStruct);
+
+		/*配置对应的DMA信号传送：由CH0的捕获事件触发UTimer1_CMP0到DSHOT专用接收缓冲区*/
+    DMA_InitTypeDef DMA_InitStruct;
+    DMA_StructInit(&DMA_InitStruct);
+		
+		DMA_ClearIRQFlag(CH0_FIF);
+
+    DMA_InitStruct.DMA_IRQ_EN = ENABLE;             /* DMA 传输完成中断使能 */
+    DMA_InitStruct.DMA_CIRC = DISABLE;              /* DMA传输模式：循环模式，高有效 */
+    DMA_InitStruct.DMA_SINC = DISABLE;              /* 源地址递增, 高有效,地址按照SBTW对应大小递增 1/2/4*/
+    DMA_InitStruct.DMA_DINC = ENABLE;               /* 目的地址递增,高有效,地址按照DBTW对应大小递增 1/2/4*/
+    DMA_InitStruct.DMA_SBTW = DMA_HALFWORD_TRANS;   /* 源访问位宽，0:byte, 1:half-word, 2:word */
+    DMA_InitStruct.DMA_DBTW = DMA_HALFWORD_TRANS;   /* 目的访问位宽，0:byte, 1:half-word, 2:word */
+    DMA_InitStruct.DMA_REQ_EN = DMA_TIMER1_REQ_EN; 	/* UTimer的DMA请求使能，高有效*/
+    DMA_InitStruct.DMA_RMODE = ENABLE;              /* 0:单轮传输，一轮连续传输多次 或 1:多轮，每轮进行一次数据传输*/
+    DMA_InitStruct.DMA_SADR = (u32)&GPIO1->PDI;   /* 设置为GPIO1的输入寄存器的目的地址*/
+    DMA_InitStruct.DMA_DADR = (u32)&protocolHandler.dShotReceiveBuffer[0];     	/* DMA目的地址设置为DHSOT专用的接收缓冲区*/
+    DMA_Init(DMA_CH0, &DMA_InitStruct);							/* 由DMA的通道0完成这个事件*/	
 }
 /*******************************************************************************
  函数名称：    void CMP_init(void)

@@ -23,8 +23,19 @@
 /*在这里设定母线欠电压和过电压保护时的值*/
 #define BLDC_Bus_UnderVoltage_Protect (1000u)
 #define BLDC_Bus_OverVoltage_Protect (2000u)
-/*在这里设定过温阈值*/
-#define BLDC_Driver_Temperature_Protect (400u)
+
+/*====================与温度保护相关的函数设定=======================*/
+
+/*在这里设定指示温度过高的函数*/
+STI bool BLDC_TEMP_Temperature_TooHigh(int16_t adcData)
+{
+		return (adcData < 1000) ? true : false;
+}
+/*在这里设定指示温度过低的函数*/
+STI bool BLDC_TEMP_Temperature_TooLow(int16_t adcData)
+{
+		return (adcData > 15000) ? true : false;
+}
 
 /*====================与GPIO相关的函数设定=======================*/
 
@@ -245,8 +256,8 @@ STI uint32_t BLDC_GetDriverTemperature(void)
 
 typedef enum{
 		eBLDC_Sys_Reset = 0,
-		eBLDC_Sys_WaitBus,
-		eBLDC_Sys_WaitCap,
+		eBLDC_Sys_WaitBusAndTemp,
+		eBLDC_Sys_WaitCapCharge,
 		eBLDC_Sys_WaitStart,
 		eBLDC_Sys_Polling
 }BLDC_SysStatus;
@@ -281,6 +292,8 @@ typedef struct{
 
 typedef enum{
 	eBLDC_Sys_Error_None = 0,
+	eBLDC_Sys_Error_Bus,
+	eBLDC_Sys_Error_Temp,
 	eBLDC_Sys_Error_DriverBrake,
 	eBLDC_Sys_Error_RotorBlock,
 	eBLDC_Sys_Error_Commutation

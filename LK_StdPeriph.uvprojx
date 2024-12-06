@@ -327,7 +327,7 @@
             <uSurpInc>0</uSurpInc>
             <uC99>1</uC99>
             <uGnu>0</uGnu>
-            <useXO>1</useXO>
+            <useXO>0</useXO>
             <v6Lang>1</v6Lang>
             <v6LangP>1</v6LangP>
             <vShortEn>1</vShortEn>
@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>.\Include;.\Kernal_Source;.\LKS32MC03x_Periph_Driver\include;.\BLDC_Sensorless\include</IncludePath>
+              <IncludePath>.\Include;.\Kernal_Source;.\LKS32MC03x_Periph_Driver\include;.\BLDC_Sensorless\include;.\protocol\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -512,6 +512,16 @@
               <FileName>bldcDriver.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\BLDC_Sensorless\source\bldcDriver.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Protocol</GroupName>
+          <Files>
+            <File>
+              <FileName>protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\protocol\source\protocol.c</FilePath>
             </File>
           </Files>
         </Group>

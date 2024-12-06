@@ -25,6 +25,7 @@
 #include "hardware_init.h"
 #include "delay.h"
 
+#include "protocol.h"
 /*******************************************************************************
  函数名称：    int main(void)
  功能描述：    主程序入口
@@ -62,14 +63,16 @@ int main(void)
 //	/*通道3用来触发ADC*/
 //	PWMOutputs_CH3(MCPWM0, ENABLE);
 	
-	/*TIM0作为低速时钟的时基*/
+	/*TIM0使能*/
 	TIM_TimerCmd(TIMER0,ENABLE);
+	/*TIM1使能*/
+	TIM_TimerCmd(TIMER1,ENABLE);
 	/*使能三相的PWM输出*/
 	PWMOutputs(MCPWM0, ENABLE);
 	for (;;)
 	{
-		IWDG_Feed();//看门狗喂狗
-		delay_ms(500);
+		protocol_PollingTask();
+//		IWDG_Feed();//看门狗喂狗
 	}
 }
 

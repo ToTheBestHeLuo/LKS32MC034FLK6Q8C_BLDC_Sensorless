@@ -23,6 +23,7 @@
 ".\LKS32MC03x_Periph_Driver\Source\lks32mc03x_nvr.lib"
 ".\obj\startup_lks32mc03x.o"
 ".\obj\bldcdriver.o"
+".\obj\protocol.o"
 --strict --scatter ".\Obj\LKS_MC_Project.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
