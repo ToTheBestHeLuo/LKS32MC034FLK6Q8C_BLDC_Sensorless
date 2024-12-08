@@ -281,13 +281,13 @@ typedef enum{
 }BLDC_RunMode;
 
 typedef struct{
-		BLDC_RunStatus runStatus;
-		BLDC_RunMode runMode;
 		uint32_t commutationTime;
 		uint32_t speedUpCycle;
 		int16_t pwmCount,pwmCountTarget;
-		bool CWCCW,comparePolarity;
+		BLDC_RunStatus runStatus;
+		BLDC_RunMode runMode;
 		uint8_t sector;
+		bool CWCCW,comparePolarity;
 }BLDC_SensorlessHandler;
 
 typedef enum{
@@ -304,9 +304,9 @@ typedef struct{
 		BLDC_Sys_Error_Code sysErrorCode;
 		uint32_t lowSpeedCounter;
 		uint32_t highSpeedCounter;
-		uint8_t counter;
 		BLDC_ADCSensorHandler adcSensorHandler;
 		BLDC_SensorlessHandler bldcSensorlessHandler;
+		uint8_t counter;
 }BLDC_SysHandler;
 
 extern BLDC_SysHandler bldcSysHandler;

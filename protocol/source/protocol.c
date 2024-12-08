@@ -10,9 +10,6 @@
  */
 #include "..\include\protocol.h"
 
-#include <stddef.h>
-#include <stdbool.h>
-
 ProtocolHandler protocolHandler = {
 	.status = eProtocol_Sys_Reset
 };
@@ -113,7 +110,7 @@ static void dShot600AnalysisFunction(void)
  *******************************************************************************/
 static void dShot300AnalysisFunction(void)
 {
-
+		protocolHandler.testData = dShot_ReceiveValueWithDMA();
 }
 /*******************************************************************************
  函数名称：    static void dShot600AnalysisFunction(void)
@@ -125,7 +122,7 @@ static void dShot300AnalysisFunction(void)
  *******************************************************************************/
 static void dShot150AnalysisFunction(void)
 {
-
+		protocolHandler.testData = dShot_ReceiveValueWithDMA();
 }
 
 /*不同协议的解析，使用跳转表的形式来实现*/
@@ -149,6 +146,7 @@ void protocol_Reset(void)
 		protocolHandler.type = eProtocol_Type_Unkown;
 		protocolHandler.signalPulseWidth = 0u;
 		protocolHandler.signalFrameCounter = 0u;
+		protocolHandler.dShotReceiveSamplingPoint = dShot600_SamplingPoint;
 }
 /*******************************************************************************
  函数名称：    void protocol_PollingTask(void)
@@ -169,12 +167,15 @@ void protocol_PollingTask(void)
 			case eProtocol_Sys_TypeCheck:
 				if(protocolHandler.signalFrameCounter == 2){
 					if(protocolHandler.signalPulseWidth > dShot600_MinPulseWidth && protocolHandler.signalPulseWidth < dShot600_MaxPulseWidth){
+						protocolHandler.dShotReceiveSamplingPoint = dShot600_SamplingPoint;
 						protocolHandler.type = eProtocol_Type_dShot600;
 						protocolHandler.status = eProtocol_Sys_Polling;
 					}else if(protocolHandler.signalPulseWidth > dShot300_MinPulseWidth && protocolHandler.signalPulseWidth < dShot300_MaxPulseWidth){
+						protocolHandler.dShotReceiveSamplingPoint = dShot300_SamplingPoint;
 						protocolHandler.type = eProtocol_Type_dShot300;
 						protocolHandler.status = eProtocol_Sys_Polling;						
 					}else if(protocolHandler.signalPulseWidth > dShot150_MinPulseWidth && protocolHandler.signalPulseWidth < dShot150_MaxPulseWidth){
+						protocolHandler.dShotReceiveSamplingPoint = dShot150_SamplingPoint;
 						protocolHandler.type = eProtocol_Type_dShot150;
 						protocolHandler.status = eProtocol_Sys_Polling;						
 					}else{

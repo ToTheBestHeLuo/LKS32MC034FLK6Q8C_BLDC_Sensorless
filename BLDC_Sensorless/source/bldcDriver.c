@@ -169,7 +169,7 @@ static void BLDC_SysReset(void)
 		bldcSysHandler.bldcSensorlessHandler.runMode = eBLDC_Run_Mode_Wait;
 		bldcSysHandler.bldcSensorlessHandler.speedUpCycle = BLDC_Startup_Initial_Cycle;
 		bldcSysHandler.bldcSensorlessHandler.pwmCount = BLDC_Startup_PWM_Count;
-		bldcSysHandler.bldcSensorlessHandler.pwmCountTarget = 1100;
+		bldcSysHandler.bldcSensorlessHandler.pwmCountTarget = BLDC_Startup_PWM_Count;
 		bldcSysHandler.bldcSensorlessHandler.CWCCW = true;
 		bldcSysHandler.bldcSensorlessHandler.comparePolarity = true;
 		bldcSysHandler.bldcSensorlessHandler.commutationTime = 0u;

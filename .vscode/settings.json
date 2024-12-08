@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "bldcconfig.h": "c",
+        "stddef.h": "c",
+        "hardware_init.h": "c",
+        "lks32mc03x_lib.h": "c"
+    }
+}
