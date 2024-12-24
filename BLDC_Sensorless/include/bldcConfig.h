@@ -19,10 +19,19 @@
 #define BLDC_Startup_Initial_Cycle (100)
 #define BLDC_Startup_Final_Cycle (20)
 /*在这里设定启动成功后占空比（油门）的响应速度，需要注意的是值不能太低，这会导致过高的响应速度，并可能导致换相错误*/
-#define BLDC_StartCompleted_SpeedUpLimit (10u)
+#define BLDC_StartCompleted_SpeedUpLimit (1u)
 /*在这里设定母线欠电压和过电压保护时的值*/
 #define BLDC_Bus_UnderVoltage_Protect (1000u)
 #define BLDC_Bus_OverVoltage_Protect (2000u)
+
+/*====================与硬件除法相关的函数设定=======================*/
+
+STI int32_t BLDC_Div(int32_t dividend,int32_t divisor)
+{
+		DSP_DID = dividend;
+		DSP_DIS = divisor;
+		return DSP_QUO;
+}
 
 /*====================与温度保护相关的函数设定=======================*/
 
@@ -281,7 +290,8 @@ typedef enum{
 }BLDC_RunMode;
 
 typedef struct{
-		uint32_t commutationTime;
+		int32_t commutationTime,estSpeedHz;
+		uint8_t commutationFilter1,commutationFilter2,commutationScaler;
 		uint32_t speedUpCycle;
 		int16_t pwmCount,pwmCountTarget;
 		BLDC_RunStatus runStatus;

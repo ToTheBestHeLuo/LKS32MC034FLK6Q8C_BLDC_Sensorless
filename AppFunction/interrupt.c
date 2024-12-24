@@ -57,7 +57,7 @@ void DMA_IRQHandler(void)
 			if(protocolHandler.status == eProtocol_Sys_Polling){	
 				/*开始做信号解析*/
 				protocolAnalysisFunc[protocolHandler.type]();
-				if(protocolHandler.testData != 951) GPIO_ResetBits(GPIO1,GPIO_Pin_5);
+//				if(protocolHandler.testData != 951) GPIO_ResetBits(GPIO1,GPIO_Pin_5);
 				
 			}else{
 				if(protocolHandler.signalFrameCounter < 2){
@@ -68,7 +68,7 @@ void DMA_IRQHandler(void)
 			/*重设CH0的比较值，重新打开CH0的比较中断*/
 			TIMER1->CMPT0 = 720;TIMER1->IE |= 0x00000001;
 		}
-		GPIO_SetBits(GPIO1,GPIO_Pin_5);	
+//		GPIO_SetBits(GPIO1,GPIO_Pin_5);	
 }
 
 /*******************************************************************************
@@ -132,6 +132,13 @@ void HALL_IRQHandler(void)
 				bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_RotorBlock;
 			else if(runMode == eBLDC_Run_Mode_COMP_INT)
 				bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_Commutation;
+		
+			/*下列函数调用目的是为了重启电机*/
+			BLDC_HALL_OverFlowInt_TurnOff();
+			BLDC_COMP_Int_TurnOff();
+			BLDC_COMP_Int_SetPolarity_High();
+			BLDC_HALL_SetThreshold_High();
+			BLDC_COMP_SetFilter_LowDelay();
 		}
 }
 
@@ -169,7 +176,7 @@ void TIMER1_IRQHandler(void)
 		if(TIMER1->IF & 0xFFFFFFFE){
 			TIMER1->IF = 0x7;
 			/*关闭CH0的比较中断，设置CH0的比较值,然后启动DMA传输任务*/
-			TIMER1->IE &= 0xFFFFFFFE;TIMER1->CMPT0 = protocolHandler.dShotReceiveSamplingPoint;
+			TIMER1->IE &= 0xFFFFFFFE;TIMER1->CMPT0 = protocolHandler.receiveSamplingPoint;
 			/*配置DMA的传输数目并使能对应的通道*/
 			DMA_CH0->DMA_CCR  &= ~BIT0; /*关闭通道使能*/
 			DMA_CH0->DMA_CTMS = 16;    /*配置DMA搬运轮数或次数*/

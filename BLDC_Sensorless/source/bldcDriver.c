@@ -23,12 +23,32 @@ static void (*BLDC_SwitchTable[6])(uint16_t pwmCount);
 
 BLDC_SysHandler bldcSysHandler;
 
+//typedef struct{
+//		int32_t integrator;
+//		int32_t maxOut,minOut;
+//		int32_t kP,kI;
+//		int16_t scaler1,scaler2;
+//}PIControllerHandler;
+
+//PIControllerHandler pi;
+
+///*******************************************************************************
+// 函数名称：    static int32_t BLDC_PIController(int32_t err)
+// 功能描述：    速度闭环控制器
+// 其它说明：    无
+// *******************************************************************************/
+//static int32_t BLDC_PIController(int32_t err)
+//{
+//		int32_t out = ((err * pi.kP) >> pi.scaler1) + ((pi.integrator * pi.kI) >> pi.scaler2);
+//		pi.integrator += err;
+//		if(out < pi.minOut) out = pi.minOut;
+//		else if(out > pi.maxOut) out = pi.maxOut;
+//		return out;
+//}
+
 /*******************************************************************************
  函数名称：    static bool BLDC_Run_Mode_COMP_Polling_Commutation(void)
  功能描述：    轮询模式下，无感BLDC六步换相系统的过零检测函数，当返回true表示需要立即换相，当返回false时表示无需换相
- 输入参数：    无         
- 输出参数：    无
- 返 回 值：    无
  其它说明：    无
  *******************************************************************************/
 static bool BLDC_Run_Mode_COMP_Polling_Commutation(void)
@@ -45,9 +65,6 @@ static bool BLDC_Run_Mode_COMP_Polling_Commutation(void)
 /*******************************************************************************
  函数名称：    static void BLDC_Run_Mode_COMP_Polling(void)
  功能描述：    无感BLDC六步换相系统工作在比较器轮询模式
- 输入参数：    无         
- 输出参数：    无
- 返 回 值：    无
  其它说明：    无
  *******************************************************************************/
 static void BLDC_Run_Mode_COMP_Polling(void)
@@ -95,7 +112,10 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 				break;
 			case eBLDC_Run_ReadyForCloseLoop:
 				if(BLDC_Run_Mode_COMP_Polling_Commutation()){
-					bldcSysHandler.bldcSensorlessHandler.commutationTime = BLDC_HALL_GetCounter();
+					bldcSysHandler.bldcSensorlessHandler.commutationTime = (BLDC_HALL_GetCounter() * bldcSysHandler.bldcSensorlessHandler.commutationFilter1 \
+																																	+ bldcSysHandler.bldcSensorlessHandler.commutationFilter2 * bldcSysHandler.bldcSensorlessHandler.commutationTime) \
+																																	>> bldcSysHandler.bldcSensorlessHandler.commutationScaler;
+					bldcSysHandler.bldcSensorlessHandler.estSpeedHz = BLDC_Div(8000000,bldcSysHandler.bldcSensorlessHandler.commutationTime);
 					BLDC_HALL_ResetCounter();
 					bldcSysHandler.counter++;
 					bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
@@ -120,20 +140,22 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 /*******************************************************************************
  函数名称：    static void BLDC_Run_Mode_COMP_Int(void)
  功能描述：    无感BLDC六步换相系统工作在比较器中断模式，用以确定过零点
- 输入参数：    无         
- 输出参数：    无
- 返 回 值：    无
  其它说明：    无
  *******************************************************************************/
 static void BLDC_Run_Mode_COMP_Int(void)
 {
+	
 		bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
 		BLDC_SwitchTable[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)bldcSysHandler.bldcSensorlessHandler.pwmCount);
 	
 		BLDC_COMP_Int_TurnOff();
 		CMP->IF = 0x3;
 	
-		bldcSysHandler.bldcSensorlessHandler.commutationTime = BLDC_HALL_GetCounter();
+		bldcSysHandler.bldcSensorlessHandler.commutationTime = (BLDC_HALL_GetCounter() * bldcSysHandler.bldcSensorlessHandler.commutationFilter1 \
+																														+ bldcSysHandler.bldcSensorlessHandler.commutationFilter2 * bldcSysHandler.bldcSensorlessHandler.commutationTime) \
+																														>> bldcSysHandler.bldcSensorlessHandler.commutationScaler;
+		bldcSysHandler.bldcSensorlessHandler.estSpeedHz = BLDC_Div(8000000,bldcSysHandler.bldcSensorlessHandler.commutationTime);
+	
 		BLDC_HALL_ResetCounter();
 	
 		BLDC_COMP_GetPolarity() ? BLDC_COMP_Int_SetPolarity_Low() : BLDC_COMP_Int_SetPolarity_High();
@@ -151,9 +173,6 @@ static void BLDC_Run_Mode_COMP_Int(void)
 /*******************************************************************************
  函数名称：    static void BLDC_SysReset(void)
  功能描述：    无感BLDC六步换相系统复位函数，主要负责一些变量的初始化
- 输入参数：    无         
- 输出参数：    无
- 返 回 值：    无
  其它说明：    无
  *******************************************************************************/
 static void BLDC_SysReset(void)
@@ -170,15 +189,19 @@ static void BLDC_SysReset(void)
 		bldcSysHandler.bldcSensorlessHandler.speedUpCycle = BLDC_Startup_Initial_Cycle;
 		bldcSysHandler.bldcSensorlessHandler.pwmCount = BLDC_Startup_PWM_Count;
 		bldcSysHandler.bldcSensorlessHandler.pwmCountTarget = BLDC_Startup_PWM_Count;
-		bldcSysHandler.bldcSensorlessHandler.CWCCW = true;
+		bldcSysHandler.bldcSensorlessHandler.CWCCW = false;
 		bldcSysHandler.bldcSensorlessHandler.comparePolarity = true;
-		bldcSysHandler.bldcSensorlessHandler.commutationTime = 0u;
+		bldcSysHandler.bldcSensorlessHandler.commutationTime = 0;
+		bldcSysHandler.bldcSensorlessHandler.estSpeedHz = 0;
+		bldcSysHandler.bldcSensorlessHandler.commutationFilter1 = 4;
+		bldcSysHandler.bldcSensorlessHandler.commutationFilter2 = 60;
+		bldcSysHandler.bldcSensorlessHandler.commutationScaler = 6;
 	
 		bldcSysHandler.adcSensorHandler.adcBusVoltageValue = 0;
 		bldcSysHandler.adcSensorHandler.adcDriverTemperatureValue = 0;
 		bldcSysHandler.adcSensorHandler.adcBusCurrent = 0;
 		bldcSysHandler.adcSensorHandler.adcBusCurrentOffset = 0;
-	
+		
 		if(bldcSysHandler.bldcSensorlessHandler.CWCCW){
 			BLDC_SwitchTable[0] = BLDC_SwitchTableCW[0];
 			BLDC_SwitchTable[1] = BLDC_SwitchTableCW[1];
@@ -198,19 +221,18 @@ static void BLDC_SysReset(void)
 /*******************************************************************************
  函数名称：    void BLDC_LowSpeedTask(void)
  功能描述：    无感BLDC六步换相低速时钟任务，主要负责处理一些安全任务和低速通信任务
- 输入参数：    无         
- 输出参数：    无
- 返 回 值：    无
  其它说明：    由ADC完成中断进行调用，中断优先级小于高速时钟任务
  *******************************************************************************/
 void BLDC_LowSpeedTask(void)
 {
 		static int32_t busCurrentOffset = 0;
 		static uint16_t busErrorCnt = 0u,tempErrorCnt = 0u;
+
 		BLDC_SysStatus status = bldcSysHandler.sysStatus;
-		bldcSysHandler.adcSensorHandler.adcBusVoltageValue = BLDC_GetBusVoltage();
+		bldcSysHandler.adcSensorHandler.adcBusVoltageValue = (BLDC_GetBusVoltage() * 4 + bldcSysHandler.adcSensorHandler.adcBusVoltageValue * 60) / 64;
 		bldcSysHandler.adcSensorHandler.adcDriverTemperatureValue = BLDC_GetDriverTemperature();
-		bldcSysHandler.adcSensorHandler.adcBusCurrent = BLDC_GetBusCurrent() - bldcSysHandler.adcSensorHandler.adcBusCurrentOffset;
+	
+		int16_t busCurrent = BLDC_GetBusCurrent() - bldcSysHandler.adcSensorHandler.adcBusCurrentOffset;
 		switch(status){
 			case eBLDC_Sys_Reset:
 				BLDC_PWM_Int_TurnOn();
@@ -234,7 +256,7 @@ void BLDC_LowSpeedTask(void)
 				}else bldcSysHandler.lowSpeedCounter = 0u;
 				break;
 			case eBLDC_Sys_WaitCapCharge:
-				busCurrentOffset += bldcSysHandler.adcSensorHandler.adcBusCurrent;
+				busCurrentOffset += busCurrent;
 				if(bldcSysHandler.lowSpeedCounter++ > 127){
 					bldcSysHandler.adcSensorHandler.adcBusCurrentOffset = busCurrentOffset / 128;
 					bldcSysHandler.lowSpeedCounter = 0u;
@@ -249,6 +271,9 @@ void BLDC_LowSpeedTask(void)
 				}
 				break;
 			case eBLDC_Sys_Polling:
+			
+				bldcSysHandler.adcSensorHandler.adcBusCurrent = (busCurrent * 4 + bldcSysHandler.adcSensorHandler.adcBusCurrent * 60) / 64;
+			
 				if(bldcSysHandler.adcSensorHandler.adcBusVoltageValue < BLDC_Bus_UnderVoltage_Protect || bldcSysHandler.adcSensorHandler.adcBusVoltageValue > BLDC_Bus_OverVoltage_Protect){
 					if(busErrorCnt++ > 100u){
 						BLDC_PWM_TurnOff();
@@ -286,9 +311,6 @@ void BLDC_LowSpeedTask(void)
 /*******************************************************************************
  函数名称：    void BLDC_HighSpeedTask(void)
  功能描述：    无感BLDC六步换相高速时钟任务，主要负责一系列电机起动以及换相等任务
- 输入参数：    无         
- 输出参数：    无
- 返 回 值：    无
  其它说明：    由MCPWM中断进行调用，中断优先级高于低速时钟任务
  *******************************************************************************/
 void BLDC_HighSpeedTask(void)
@@ -300,9 +322,6 @@ void BLDC_HighSpeedTask(void)
 /*******************************************************************************
  函数名称：    void BLDC_ZeroCrossCompTask(void)
  功能描述：    无感BLDC六步换相比较器过零信号任务，主要负责闭环下的电机高速运行任务
- 输入参数：    无         
- 输出参数：    无
- 返 回 值：    无
  其它说明：    由COMP边沿中断进行调用，中断优先级与MCPWM中断同等级
  *******************************************************************************/
 void BLDC_ZeroCrossCompTask(void)

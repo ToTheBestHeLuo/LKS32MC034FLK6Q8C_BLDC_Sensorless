@@ -56,13 +56,7 @@ int main(void)
 
 	strPWM_DutyCycle.th20 = -PWM_PERIOD;
 	strPWM_DutyCycle.th21 = -PWM_PERIOD;
-	
-
 	MCPWM_Update(&strPWM_DutyCycle);
-	
-//	/*通道3用来触发ADC*/
-//	PWMOutputs_CH3(MCPWM0, ENABLE);
-	
 	/*TIM0使能*/
 	TIM_TimerCmd(TIMER0,ENABLE);
 	/*TIM1使能*/

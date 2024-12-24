@@ -101,6 +101,8 @@ void Hardware_init(void)
 		CMP_init();
 		UTimer_init();
 	
+    DSP_Cmd(ENABLE);         /* DSP时钟使能*/
+	
 //		volatile u8 cv = OPA_CommonVoltageCorrection();
 	
 		HALL_init();
@@ -128,8 +130,8 @@ void Hardware_init(void)
     NVIC_EnableIRQ(DMA_IRQn);      /* 使能 DMA_IRQn 外部中断*/
     NVIC_SetPriority(DMA_IRQn,2); /* DMA_IRQn 外部中断优先级设置为1*/
 		
-    NVIC_EnableIRQ(TIMER1_IRQn);      /* 使能 TIMER1_IRQn 外部中断*/
-    NVIC_SetPriority(TIMER1_IRQn,2); /* TIMER1_IRQn 外部中断优先级设置为2*/
+//    NVIC_EnableIRQ(TIMER1_IRQn);      /* 使能 TIMER1_IRQn 外部中断*/
+//    NVIC_SetPriority(TIMER1_IRQn,2); /* TIMER1_IRQn 外部中断优先级设置为2*/
 		
 	  __enable_irq();                   /* 开启总中断 */
 }
@@ -239,7 +241,7 @@ void DAC_init(void)
 		DAC_StructInit(&DAC_InitStructure);
 		DAC_InitStructure.DACOUT_EN = ENABLE ;//使能DAC电压通过P0.0输出
 		DAC_Init(&DAC_InitStructure);        /* DAC初始化 */
-		DAC_OutputVoltage(2.8f * BIT12);  /* DAC输出，每0.01V对应0.5A过流保护阈值*/
+		DAC_OutputVoltage(2.3f * BIT12);  /* DAC输出，每0.01V对应0.5A过流保护阈值*/
 }
 /*******************************************************************************
  函数名称：    void UTimer_init(void)
@@ -270,7 +272,7 @@ void UTimer_init(void)
 		TIM_ClearIRQFlag(TIMER1, TIM_IRQ_IF_ZC);
 	
 		/*注意：CH1需要映射到一个物理IO，而CH0无需开启，只需要使用其比较功能即可*/
-		/*CH0作为比较模式，开启比较中断,当这个比较中断发生后重新设置比较值，同时关断比较中断，使能DMA传输，其中DMA触发信号是CH0的比较信号，比较值设置在DSHOT的Tick的1/2处*/
+		/*CH0作为比较模式，开启比较中断,当这个比较中断发生后重新设置比较值，同时关断比较中断，使能DMA传输，其中DMA触发信号是CH0的比较信号，比较值设置在sG的Tick的1/2处*/
 		/*CH1用来捕获信号的周期脉宽，上升沿捕获，且发生捕获后自动清零CNT值*/
 	
 		/*当DMA传输完成以后，重新设置CH0的比较值，重新开启CH0的比较中断*/
@@ -292,7 +294,7 @@ void UTimer_init(void)
     TIM_InitStruct.IE = TIM_IRQ_IE_CH0 | TIM_IRQ_RE_CH0;          /* 使能Timer模块CH0比较中断以及CH0的比较触发DMA请求*/
     TIM_TimerInit(TIMER1, &TIM_InitStruct);
 
-		/*配置对应的DMA信号传送：由CH0的捕获事件触发UTimer1_CMP0到DSHOT专用接收缓冲区*/
+		/*配置对应的DMA信号传送：由CH0的捕获事件触发UTimer1_CMP0到sG专用接收缓冲区*/
     DMA_InitTypeDef DMA_InitStruct;
     DMA_StructInit(&DMA_InitStruct);
 		
@@ -307,7 +309,7 @@ void UTimer_init(void)
     DMA_InitStruct.DMA_REQ_EN = DMA_TIMER1_REQ_EN; 	/* UTimer的DMA请求使能，高有效*/
     DMA_InitStruct.DMA_RMODE = ENABLE;              /* 0:单轮传输，一轮连续传输多次 或 1:多轮，每轮进行一次数据传输*/
     DMA_InitStruct.DMA_SADR = (u32)&GPIO1->PDI;   /* 设置为GPIO1的输入寄存器的目的地址*/
-    DMA_InitStruct.DMA_DADR = (u32)&protocolHandler.dShotReceiveBuffer[0];     	/* DMA目的地址设置为DHSOT专用的接收缓冲区*/
+    DMA_InitStruct.DMA_DADR = (u32)&protocolHandler.receiveBuffer[0];     	/* DMA目的地址设置为DHSOT专用的接收缓冲区*/
     DMA_Init(DMA_CH0, &DMA_InitStruct);							/* 由DMA的通道0完成这个事件*/	
 }
 /*******************************************************************************
