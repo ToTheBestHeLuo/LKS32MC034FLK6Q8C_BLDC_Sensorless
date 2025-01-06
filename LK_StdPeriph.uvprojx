@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>.\Include;.\Kernal_Source;.\LKS32MC03x_Periph_Driver\include;.\BLDC_Sensorless\include;.\protocol\include</IncludePath>
+              <IncludePath>.\Include;.\Kernal_Source;.\LKS32MC03x_Periph_Driver\include;.\BLDC_Sensorless\include;.\sG_Slave</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -516,12 +516,12 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Protocol</GroupName>
+          <GroupName>sG_Slave</GroupName>
           <Files>
             <File>
-              <FileName>protocol.c</FileName>
+              <FileName>sGSlave.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\protocol\source\protocol.c</FilePath>
+              <FilePath>.\sG_Slave\sGSlave.c</FilePath>
             </File>
           </Files>
         </Group>

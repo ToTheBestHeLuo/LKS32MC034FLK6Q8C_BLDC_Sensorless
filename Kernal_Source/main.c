@@ -24,8 +24,6 @@
 #include "lks32mc03x_lib.h"
 #include "hardware_init.h"
 #include "delay.h"
-
-#include "protocol.h"
 /*******************************************************************************
  函数名称：    int main(void)
  功能描述：    主程序入口
@@ -65,7 +63,6 @@ int main(void)
 	PWMOutputs(MCPWM0, ENABLE);
 	for (;;)
 	{
-		protocol_PollingTask();
 //		IWDG_Feed();//看门狗喂狗
 	}
 }

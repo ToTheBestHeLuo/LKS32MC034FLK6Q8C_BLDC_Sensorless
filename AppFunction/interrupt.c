@@ -14,7 +14,6 @@
 #include "hardware_init.h"
 
 #include "bldcConfig.h"
-#include "protocol.h"
 /*******************************************************************************
  函数名称：    void ADC_IRQHandler(void)
  功能描述：    ADC0中断处理函数
@@ -49,26 +48,7 @@ void ADC_IRQHandler(void)
  *******************************************************************************/
 void DMA_IRQHandler(void)
 {
-//		GPIO_ResetBits(GPIO1,GPIO_Pin_5);
-		/*检查DMA的CH0完成中断*/
-		if(DMA_IF & 0x1){
-			DMA_IF = 0xf;
-			/*检查当前系统的工作状态*/
-			if(protocolHandler.status == eProtocol_Sys_Polling){	
-				/*开始做信号解析*/
-				protocolAnalysisFunc[protocolHandler.type]();
-//				if(protocolHandler.testData != 951) GPIO_ResetBits(GPIO1,GPIO_Pin_5);
-				
-			}else{
-				if(protocolHandler.signalFrameCounter < 2){
-					protocolHandler.signalPulseWidth = TIMER1->CMPT1;
-					protocolHandler.signalFrameCounter++;
-				}
-			}
-			/*重设CH0的比较值，重新打开CH0的比较中断*/
-			TIMER1->CMPT0 = 720;TIMER1->IE |= 0x00000001;
-		}
-//		GPIO_SetBits(GPIO1,GPIO_Pin_5);	
+
 }
 
 /*******************************************************************************
@@ -171,18 +151,7 @@ void TIMER0_IRQHandler(void)
  *******************************************************************************/
 void TIMER1_IRQHandler(void)
 {
-//			GPIO_ResetBits(GPIO1,GPIO_Pin_5);
-		/*检查是否为TIMER1的CH0比较中断*/
-		if(TIMER1->IF & 0xFFFFFFFE){
-			TIMER1->IF = 0x7;
-			/*关闭CH0的比较中断，设置CH0的比较值,然后启动DMA传输任务*/
-			TIMER1->IE &= 0xFFFFFFFE;TIMER1->CMPT0 = protocolHandler.receiveSamplingPoint;
-			/*配置DMA的传输数目并使能对应的通道*/
-			DMA_CH0->DMA_CCR  &= ~BIT0; /*关闭通道使能*/
-			DMA_CH0->DMA_CTMS = 16;    /*配置DMA搬运轮数或次数*/
-			DMA_CH0->DMA_CCR  |= BIT0;/*使能DMA搬运*/
-		}
-//			GPIO_SetBits(GPIO1,GPIO_Pin_5);
+
 }
 
 /*******************************************************************************

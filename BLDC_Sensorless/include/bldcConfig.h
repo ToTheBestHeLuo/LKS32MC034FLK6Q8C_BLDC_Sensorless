@@ -7,22 +7,71 @@
 
 /*在这里添加用户头文件*/
 #include "hardware_init.h"
-#define PWM_PERIOD_COUNT (1200)
 
-/*在这里设定BLDC的最大以及最小PWM值*/
-#define BLDC_Max_PWM_Count (+1100)
-#define BLDC_Min_PWM_Count (-1000)
-/*在这里设定启动时的定位需要多少个Cycle*/
-#define BLDC_Startup_Alignment_Cycle (400)
-/*在这里设定启动时的初始PWM值和初始时以及最终的周期Cycle*/
-#define BLDC_Startup_PWM_Count (-1000)
-#define BLDC_Startup_Initial_Cycle (100)
-#define BLDC_Startup_Final_Cycle (20)
-/*在这里设定启动成功后占空比（油门）的响应速度，需要注意的是值不能太低，这会导致过高的响应速度，并可能导致换相错误*/
-#define BLDC_StartCompleted_SpeedUpLimit (1u)
+/////*在这里设定BLDC的最大以及最小PWM值*/
+//#define BLDC_Max_PWM_Count (+1200)
+//#define BLDC_Min_PWM_Count (-1000)
+///*在这里设定启动时的定位需要多少个Cycle*/
+//#define BLDC_Startup_Alignment_Cycle (800)
+///*在这里设定启动时的初始PWM值和初始时以及最终的周期Cycle*/
+//#define BLDC_Startup_PWM_Count (-1000)
+//#define BLDC_Startup_Initial_Cycle (120)
+//#define BLDC_Startup_Final_Cycle (30)
+///*在这里设定启动成功后占空比（油门）的响应速度，需要注意的是值不能太低，尤其是在带负载情况下，这会导致过高的响应速度，并可能导致换相错误*/
+//#define BLDC_StartCompleted_SpeedUpLimit (10u)
+
+
 /*在这里设定母线欠电压和过电压保护时的值*/
 #define BLDC_Bus_UnderVoltage_Protect (1000u)
 #define BLDC_Bus_OverVoltage_Protect (2000u)
+
+/*下面的结构体为电机的静态参数，这部分参数的调整必须在电机运行前调整。当电机进入运行后，这些参数将被锁定。
+	可以通过复位电机到停机状态后，才可以重新调整静态参数。最后，这部分参数都可以通过sG单线协议进行修改*/
+typedef struct{
+	/*电调的16位ID*/
+	uint16_t escID;
+	/*电机所能达到的最大占空比值，范围[-1200,+1200]*/
+	int16_t motroDutyCycle_Max;
+	/*电机所能达到的最小占空比值，范围[-1200,+1200]*/
+	int16_t motroDutyCycle_Min;
+	/*电机发出哔哔声的音量，也就是占空比值，且不受上面两个参数的限制，需要注意的是，过大的音量值可能导致损坏电机*/
+	int16_t motorBeepVolume;
+	/*开环起动，电机的起动占空比*/
+	int16_t motorStartupDutyCycle;
+	/*开环起动，电机的起动周期*/
+	uint16_t motorStartupInitialCycle;
+	/*开环起动，电机的最终周期*/
+	uint16_t motorStartupFinalCycle;
+	/*开环起动，电机的定位时长*/
+	uint16_t motorStartupFixedCycle;
+	/*开环起动，电机旋转多少个电气步数进入闭环（6个电气步数为1个完整的电气圈数）*/
+	uint16_t motorStartupRotateStep;
+	/*开环起动，过零信号的滤波系数，滤波时长的计算公式为：3MHz除以1+motorStartup_ZC_Filter1）再除以2^(motorStartup_ZC_Filter2)，
+		motorStartup_ZC_Filter1范围[0,15],motorStartup_ZC_Filter2范围[0,7]*/
+	uint8_t motorStartup_ZC_Filter1,motorStartup_ZC_Filter2;
+	/*开环起动，堵转检测阈值，其频率为48MHz除以motorStartup_BlockThreshold，若未在这段时间内产生换相信号则认为产生堵转事件*/
+	uint32_t motorStartup_BlockThreshold;
+	/*闭环模式下，过零信号的滤波系数，滤波时长的计算公式为：3MHz除以1+motorStartup_ZC_Filter1）再除以2^(motorStartup_ZC_Filter2)*/
+	uint8_t motorRun_ZC_Filter1,motorRun_ZC_Filter2;
+	/*闭环模式下，电机的油门响应速度（也即占空比变化速度），指的是每个Step比较中断下油门的最大变化速度，其中第一个为加速过程、第二个为减速过程
+		需要注意的是，这个值越小，响应速度越快*/
+	uint8_t  mototRunThrottle_SpeedUpRate,mototRunThrottle_SlowDownRate;
+	/*闭环模式下，丢步或堵转检测阈值，其频率为48MHz除以motorRun_BlockThreshold，若未在这段时间内产生换相信号则认为产生堵转事件*/
+	uint32_t motorRun_BlockThreshold;
+	/*闭环模式下，速度滤波器参数，其中应当满足：motorRun_SpeedFilterPar1 + motorRun_SpeedFilterPar2 = (1 << motorRun_SpeedFilterPar3)*/
+	uint8_t motorRun_SpeedFilterPar1,motorRun_SpeedFilterPar2,motorRun_SpeedFilterPar3;
+	/*开环起动以及闭环模式下的默认转向*/
+	bool motorRun_CWCCW;
+}sG_MotorParameterStruct;
+
+typedef union{
+	sG_MotorParameterStruct motorPar;
+	uint8_t sector[512];
+}sG_MotorFlashUnion;
+
+extern sG_MotorFlashUnion motorFlashData;
+
+#define PWM_PERIOD_COUNT (1200)
 
 /*====================与硬件除法相关的函数设定=======================*/
 
@@ -65,13 +114,14 @@ STI bool BLDC_GPIO_MotorControl(void)
 STI void BLDC_HALL_SetThreshold_High(void)
 {
 		//设定检测窗口为50Hz，也就是20ms，当20ms内没重置HALL的计数器，则认为产生了一次堵转事件
-		HALL->TH = 960000 - 1;
+		HALL->TH = motorFlashData.motorPar.motorStartup_BlockThreshold;
 }
 /*在这里设定HALL计数器溢出上限的函数，低阈值检测窗口*/
 STI void BLDC_HALL_SetThreshold_Low(void)
 {
 		//设定检测窗口为1200Hz，也就是0.833ms，当0.833ms内没重置HALL的计数器，则认为产生了一次换相错误事件
-		HALL->TH = 40000 - 1;
+		//但需要注意的是：空载情况与带桨（带负载情况下的阈值不同，用于空载和用于负载的值不可通用）
+		HALL->TH = motorFlashData.motorPar.motorRun_BlockThreshold;
 }
 /*在这里设定打开HALL计数器溢出中断的函数*/
 STI void BLDC_HALL_OverFlowInt_TurnOn(void)
@@ -106,12 +156,14 @@ STI void BLDC_HALL_SetThreshold(uint32_t threshold)
 /*在这里设定调整COMP硬件滤波器时钟的函数：低延迟特性，用于电机开环启动环节*/
 STI void BLDC_COMP_SetFilter_LowDelay(void)
 {
-		CMP->TCLK &= ~(BIT0 | BIT1 | BIT2);
+		CMP->TCLK &= ~(BIT0 | BIT1 | BIT2 | BIT4 | BIT5 | BIT6 | BIT7);
+		CMP->TCLK |= (motorFlashData.motorPar.motorStartup_ZC_Filter1 << 4) | motorFlashData.motorPar.motorStartup_ZC_Filter2;
 }
 /*在这里设定调整COMP硬件滤波器时钟的函数：高延迟特性，用于电机闭环运行环节*/
 STI void BLDC_COMP_SetFilter_HighDelay(void)
 {
-		CMP->TCLK |= (BIT0);
+		CMP->TCLK &= ~(BIT0 | BIT1 | BIT2 | BIT4 | BIT5 | BIT6 | BIT7);
+		CMP->TCLK |= (motorFlashData.motorPar.motorRun_ZC_Filter1 << 4) | motorFlashData.motorPar.motorRun_ZC_Filter2;
 }
 /*在这里设定获取COMP比较结果（硬件滤波后）的函数*/
 STI bool BLDC_COMP_GetData_Filter(void)
@@ -267,6 +319,7 @@ typedef enum{
 		eBLDC_Sys_Reset = 0,
 		eBLDC_Sys_WaitBusAndTemp,
 		eBLDC_Sys_WaitCapCharge,
+		eBLDC_Sys_LoadMotorParameter,
 		eBLDC_Sys_WaitStart,
 		eBLDC_Sys_Polling
 }BLDC_SysStatus;
@@ -292,7 +345,8 @@ typedef enum{
 typedef struct{
 		int32_t commutationTime,estSpeedHz;
 		uint8_t commutationFilter1,commutationFilter2,commutationScaler;
-		uint32_t speedUpCycle;
+		uint32_t speedUpCycle,speedUpFinalCycle;
+		uint8_t speedUpTimeCost,slowDownTimeCost;
 		int16_t pwmCount,pwmCountTarget;
 		BLDC_RunStatus runStatus;
 		BLDC_RunMode runMode;
@@ -309,14 +363,14 @@ typedef enum{
 	eBLDC_Sys_Error_Commutation
 }BLDC_Sys_Error_Code;
 
-typedef struct{
+typedef struct{		
 		BLDC_SysStatus sysStatus;
 		BLDC_Sys_Error_Code sysErrorCode;
 		uint32_t lowSpeedCounter;
 		uint32_t highSpeedCounter;
 		BLDC_ADCSensorHandler adcSensorHandler;
 		BLDC_SensorlessHandler bldcSensorlessHandler;
-		uint8_t counter;
+		uint16_t counter;
 }BLDC_SysHandler;
 
 extern BLDC_SysHandler bldcSysHandler;

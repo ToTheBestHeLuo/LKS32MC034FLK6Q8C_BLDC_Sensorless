@@ -14,7 +14,6 @@
 #include "hardware_init.h"
 #include "delay.h"
 
-#include "protocol.h"
 /*******************************************************************************
  函数名称：    u8 OPA_CommonVoltageCorrection(void)
  功能描述：    利用硬件的比较器CMP1和DAC完成OPA输出的共模电压的自校正
@@ -241,7 +240,7 @@ void DAC_init(void)
 		DAC_StructInit(&DAC_InitStructure);
 		DAC_InitStructure.DACOUT_EN = ENABLE ;//使能DAC电压通过P0.0输出
 		DAC_Init(&DAC_InitStructure);        /* DAC初始化 */
-		DAC_OutputVoltage(2.3f * BIT12);  /* DAC输出，每0.01V对应0.5A过流保护阈值*/
+		DAC_OutputVoltage((1.9f + 40.f / 0.5f * 0.01f) * BIT12);  /* DAC输出，每0.01V对应0.5A过流保护阈值*/
 }
 /*******************************************************************************
  函数名称：    void UTimer_init(void)
@@ -291,10 +290,10 @@ void UTimer_init(void)
     TIM_InitStruct.TH = 32767 * 32767 - 1;               			/* 设置计数器计数模值*/
     TIM_InitStruct.FLT = 1;                     /* 通道 0/1 信号滤波宽度选择，0-255 */
     
-    TIM_InitStruct.IE = TIM_IRQ_IE_CH0 | TIM_IRQ_RE_CH0;          /* 使能Timer模块CH0比较中断以及CH0的比较触发DMA请求*/
+//    TIM_InitStruct.IE = TIM_IRQ_IE_CH0 | TIM_IRQ_RE_CH0;          /* 使能Timer模块CH0比较中断以及CH0的比较触发DMA请求*/
     TIM_TimerInit(TIMER1, &TIM_InitStruct);
 
-		/*配置对应的DMA信号传送：由CH0的捕获事件触发UTimer1_CMP0到sG专用接收缓冲区*/
+		/*DMA传输的配置*/
     DMA_InitTypeDef DMA_InitStruct;
     DMA_StructInit(&DMA_InitStruct);
 		
@@ -308,8 +307,8 @@ void UTimer_init(void)
     DMA_InitStruct.DMA_DBTW = DMA_HALFWORD_TRANS;   /* 目的访问位宽，0:byte, 1:half-word, 2:word */
     DMA_InitStruct.DMA_REQ_EN = DMA_TIMER1_REQ_EN; 	/* UTimer的DMA请求使能，高有效*/
     DMA_InitStruct.DMA_RMODE = ENABLE;              /* 0:单轮传输，一轮连续传输多次 或 1:多轮，每轮进行一次数据传输*/
-    DMA_InitStruct.DMA_SADR = (u32)&GPIO1->PDI;   /* 设置为GPIO1的输入寄存器的目的地址*/
-    DMA_InitStruct.DMA_DADR = (u32)&protocolHandler.receiveBuffer[0];     	/* DMA目的地址设置为DHSOT专用的接收缓冲区*/
+    DMA_InitStruct.DMA_SADR = (u32)0;   /* 设置为GPIO1的输入寄存器的目的地址*/
+    DMA_InitStruct.DMA_DADR = (u32)0;     	/* DMA目的地址设置为DHSOT专用的接收缓冲区*/
     DMA_Init(DMA_CH0, &DMA_InitStruct);							/* 由DMA的通道0完成这个事件*/	
 }
 /*******************************************************************************
