@@ -325,7 +325,8 @@ typedef enum{
 }BLDC_SysStatus;
 
 typedef enum{
-		eBLDC_Run_Alignment = 0,
+		eBLDC_Run_Audio = 0,
+		eBLDC_Run_Alignment,
 		eBLDC_Run_SpeedUp,
 		eBLDC_Run_OpenLoop,
 		eBLDC_Run_ReadyForCloseLoop
@@ -373,6 +374,44 @@ typedef struct{
 		uint16_t counter;
 }BLDC_SysHandler;
 
+typedef enum{
+	/*Do*/
+	eTone_1 = 0,
+	/*Re*/
+	eTone_2,
+	/*Mi*/
+	eTone_3,
+	/*Fa*/
+	eTone_4,
+	/*So*/
+	eTone_5,
+	/*La*/
+	eTone_6,
+	/*Xi*/
+	eTone_7
+}BLDC_MotorTone;
+
+typedef enum{
+	eAudio_Init = 0,
+	eAudio_WaitPlay,
+	eAudio_NoPlay,
+	eAudio_Finished
+}BLDC_AudioStatus;
+
+typedef struct{
+		/*计数器*/
+		uint16_t count;
+		/*播放状态*/
+		BLDC_AudioStatus audioStatus;
+		/*最多支持连续播放256个音调*/
+		BLDC_MotorTone* audioToPlay;
+		/*一共有多少个*/
+		uint8_t inTotal;
+		/*当前播放到了哪里*/
+		uint8_t index;
+}BLDC_MotorAudioHandler;
+
+extern BLDC_MotorAudioHandler bldcAudioHandler;
 extern BLDC_SysHandler bldcSysHandler;
 
 /*这里存放的是可供用户直接调用的函数*/

@@ -1,6 +1,29 @@
 #include "bldcConfig.h"
 
-sG_MotorFlashUnion motorFlashData;;
+BLDC_SysHandler bldcSysHandler;
+
+/*正转换相表*/
+static void (*BLDC_SwitchTableCW[])(uint16_t pwmCount) = {
+		BLDC_PWM_UH_VL,
+		BLDC_PWM_UH_WL,
+		BLDC_PWM_VH_WL,
+		BLDC_PWM_VH_UL,
+		BLDC_PWM_WH_UL,
+		BLDC_PWM_WH_VL
+};
+/*反转换相表*/
+static void (*BLDC_SwitchTableCCW[])(uint16_t pwmCount) = {
+		BLDC_PWM_UH_VL,
+		BLDC_PWM_WH_VL,
+		BLDC_PWM_WH_UL,
+		BLDC_PWM_VH_UL,
+		BLDC_PWM_VH_WL,
+		BLDC_PWM_UH_WL
+};
+/*实际使用的换相表*/
+static void (*BLDC_SwitchTable[6])(uint16_t pwmCount);
+
+sG_MotorFlashUnion motorFlashData;
 
 /*******************************************************************************
  函数名称：    static void BLDC_LoadFlashData_Static(void)
@@ -14,10 +37,10 @@ static void BLDC_LoadFlashData_Static(void)
 			.escID = 0x1234,
 			.motroDutyCycle_Max = 1200,
 			.motroDutyCycle_Min = -1000,
-			.motorBeepVolume = -1175,
+			.motorBeepVolume = -1000,
 			.motorStartupDutyCycle = -1000,
 			.motorStartupInitialCycle = 120,
-			.motorStartupFinalCycle = 30,
+			.motorStartupFinalCycle = 20,
 			.motorStartupFixedCycle = 800,
 			.motorStartupRotateStep = 255,
 			.motorStartup_ZC_Filter1 = 5,
@@ -83,32 +106,77 @@ static void BLDC_LoadFlashData_Static(void)
 		bldcSysHandler.bldcSensorlessHandler.commutationFilter1 = motorFlashData.motorPar.motorRun_SpeedFilterPar1;
 		bldcSysHandler.bldcSensorlessHandler.commutationFilter2 = motorFlashData.motorPar.motorRun_SpeedFilterPar2;
 		bldcSysHandler.bldcSensorlessHandler.commutationScaler = motorFlashData.motorPar.motorRun_SpeedFilterPar3;
+		
+		if(bldcSysHandler.bldcSensorlessHandler.CWCCW){
+			BLDC_SwitchTable[0] = BLDC_SwitchTableCW[0];
+			BLDC_SwitchTable[1] = BLDC_SwitchTableCW[1];
+			BLDC_SwitchTable[2] = BLDC_SwitchTableCW[2];
+			BLDC_SwitchTable[3] = BLDC_SwitchTableCW[3];
+			BLDC_SwitchTable[4] = BLDC_SwitchTableCW[4];
+			BLDC_SwitchTable[5] = BLDC_SwitchTableCW[5];
+		}else{
+			BLDC_SwitchTable[0] = BLDC_SwitchTableCCW[0];
+			BLDC_SwitchTable[1] = BLDC_SwitchTableCCW[1];
+			BLDC_SwitchTable[2] = BLDC_SwitchTableCCW[2];
+			BLDC_SwitchTable[3] = BLDC_SwitchTableCCW[3];
+			BLDC_SwitchTable[4] = BLDC_SwitchTableCCW[4];
+			BLDC_SwitchTable[5] = BLDC_SwitchTableCCW[5];
+		}
 }
 
+BLDC_MotorAudioHandler bldcAudioHandler;
 
-/*正转换相表*/
-static void (*BLDC_SwitchTableCW[])(uint16_t pwmCount) = {
-		BLDC_PWM_UH_VL,
-		BLDC_PWM_UH_WL,
-		BLDC_PWM_VH_WL,
-		BLDC_PWM_VH_UL,
-		BLDC_PWM_WH_UL,
-		BLDC_PWM_WH_VL
+static const uint8_t audioTone[] = {
+	76,68,61,57,51,45,40
 };
-/*反转换相表*/
-static void (*BLDC_SwitchTableCCW[])(uint16_t pwmCount) = {
-		BLDC_PWM_UH_VL,
-		BLDC_PWM_WH_VL,
-		BLDC_PWM_WH_UL,
-		BLDC_PWM_VH_UL,
-		BLDC_PWM_VH_WL,
-		BLDC_PWM_UH_WL
+
+const BLDC_MotorTone motorAudio_0[7 * 4] = {
+	eTone_1,eTone_1,eTone_1,eTone_1,eTone_1,eTone_1,eTone_1,
+	eTone_1,eTone_1,eTone_1,eTone_1,eTone_1,eTone_1,eTone_1,
+	eTone_1,eTone_1,eTone_1,eTone_1,eTone_1,eTone_1,eTone_1,
+	eTone_1,eTone_1,eTone_1,eTone_1,eTone_1,eTone_1,eTone_1
 };
-/*实际使用的换相表*/
-static void (*BLDC_SwitchTable[6])(uint16_t pwmCount);
 
-BLDC_SysHandler bldcSysHandler;
+const BLDC_MotorTone motorAudio_1[7 * 4] = {
+	eTone_2,eTone_2,eTone_2,eTone_2,eTone_2,eTone_2,eTone_2,
+	eTone_2,eTone_2,eTone_2,eTone_2,eTone_2,eTone_2,eTone_2,
+	eTone_2,eTone_2,eTone_2,eTone_2,eTone_2,eTone_2,eTone_2,
+	eTone_2,eTone_2,eTone_2,eTone_2,eTone_2,eTone_2,eTone_2
+};
 
+const BLDC_MotorTone motorAudio_2[7 * 4] = {
+	eTone_3,eTone_3,eTone_3,eTone_3,eTone_3,eTone_3,eTone_3,
+	eTone_3,eTone_3,eTone_3,eTone_3,eTone_3,eTone_3,eTone_3,
+	eTone_3,eTone_3,eTone_3,eTone_3,eTone_3,eTone_3,eTone_3,
+	eTone_3,eTone_3,eTone_3,eTone_3,eTone_3,eTone_3,eTone_3
+};
+
+const BLDC_MotorTone motorAudio_3[7 * 4] = {
+	eTone_1,eTone_3,eTone_3,eTone_3,eTone_3,eTone_6,eTone_3,
+	eTone_1,eTone_4,eTone_3,eTone_2,eTone_5,eTone_3,eTone_1,
+	eTone_1,eTone_2,eTone_7,eTone_3,eTone_2,eTone_7,eTone_3,
+	eTone_1,eTone_6,eTone_3,eTone_4,eTone_4,eTone_5,eTone_1
+};
+
+/*******************************************************************************
+ 函数名称：    bool BLDC_AudioInit(BLDC_MotorTone* audioToPlay,uint8_t toneNums)
+ 功能描述：    无
+ 其它说明：    最多支持256个tone
+ *******************************************************************************/
+bool BLDC_AudioInit(BLDC_MotorTone* audioToPlay,uint8_t toneNums)
+{
+		if((uint32_t)audioToPlay == 0) return false;
+	
+		if(bldcAudioHandler.audioStatus == eAudio_Init){
+			bldcAudioHandler.audioToPlay = audioToPlay;
+			bldcAudioHandler.inTotal = toneNums;
+			bldcAudioHandler.index = 0;
+			bldcAudioHandler.audioStatus = eAudio_WaitPlay;
+			return true;
+		}
+		
+		return false;
+}
 
 /*******************************************************************************
  函数名称：    static bool BLDC_Run_Mode_COMP_Polling_Commutation(void)
@@ -134,6 +202,35 @@ static bool BLDC_Run_Mode_COMP_Polling_Commutation(void)
 static void BLDC_Run_Mode_COMP_Polling(void)
 {
 		switch(bldcSysHandler.bldcSensorlessHandler.runStatus){
+			case eBLDC_Run_Audio:
+				if(bldcAudioHandler.audioStatus == eAudio_WaitPlay){
+					BLDC_SwitchTable[0]((uint16_t)motorFlashData.motorPar.motorBeepVolume);
+					bldcAudioHandler.audioStatus = eAudio_NoPlay;
+				}else if(bldcAudioHandler.audioStatus == eAudio_NoPlay){
+					BLDC_SwitchTable[0]((uint16_t)-1200);
+					bldcSysHandler.highSpeedCounter++;
+					if(bldcSysHandler.highSpeedCounter == audioTone[bldcAudioHandler.audioToPlay[bldcAudioHandler.index]]){
+						bldcSysHandler.highSpeedCounter = 0;
+						bldcAudioHandler.count++;
+						if(bldcAudioHandler.count == 1){
+							bldcAudioHandler.count = 0;
+							bldcAudioHandler.index++;
+							if(bldcAudioHandler.index == bldcAudioHandler.inTotal){
+								bldcAudioHandler.index = 0;
+								bldcAudioHandler.audioStatus = eAudio_Finished;
+							}else{
+								bldcAudioHandler.audioStatus = eAudio_WaitPlay;
+							}
+						}
+					}
+				}else if(bldcAudioHandler.audioStatus == eAudio_Finished){
+					if(bldcSysHandler.highSpeedCounter++ == 5000){
+						bldcAudioHandler.audioStatus = eAudio_Init;
+						bldcSysHandler.highSpeedCounter = 0;
+						BLDC_AudioInit((BLDC_MotorTone*)motorAudio_1,28);
+					}
+				}
+				break;
 			case eBLDC_Run_Alignment:
 				BLDC_SwitchTable[0]((uint16_t)bldcSysHandler.bldcSensorlessHandler.pwmCount);
 				if(bldcSysHandler.highSpeedCounter++ > 500){
@@ -240,6 +337,7 @@ static void BLDC_Run_Mode_COMP_Int(void)
  *******************************************************************************/
 static void BLDC_SysReset(void)
 {
+		/*复位bldcSysHandler*/
 		bldcSysHandler.sysStatus = eBLDC_Sys_Reset;
 		bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_None;
 		bldcSysHandler.lowSpeedCounter = 0u;
@@ -247,15 +345,12 @@ static void BLDC_SysReset(void)
 		bldcSysHandler.counter = 0u;
 	
 		bldcSysHandler.bldcSensorlessHandler.sector = 0u;
-		bldcSysHandler.bldcSensorlessHandler.runStatus = eBLDC_Run_Alignment;
+		bldcSysHandler.bldcSensorlessHandler.runStatus = eBLDC_Run_Audio;
 		bldcSysHandler.bldcSensorlessHandler.runMode = eBLDC_Run_Mode_Wait;
 		bldcSysHandler.bldcSensorlessHandler.comparePolarity = true;
 		bldcSysHandler.bldcSensorlessHandler.commutationTime = 0;
 		bldcSysHandler.bldcSensorlessHandler.estSpeedHz = 0;
 	
-//		bldcSysHandler.bldcSensorlessHandler.speedUpCycle = BLDC_Startup_Initial_Cycle;
-//		bldcSysHandler.bldcSensorlessHandler.pwmCount = BLDC_Startup_PWM_Count;
-//		bldcSysHandler.bldcSensorlessHandler.pwmCountTarget = BLDC_Startup_PWM_Count;
 		bldcSysHandler.bldcSensorlessHandler.speedUpCycle = 0;
 		bldcSysHandler.bldcSensorlessHandler.speedUpFinalCycle = 0;
 		bldcSysHandler.bldcSensorlessHandler.speedUpTimeCost = 0;
@@ -272,21 +367,15 @@ static void BLDC_SysReset(void)
 		bldcSysHandler.adcSensorHandler.adcBusCurrent = 0;
 		bldcSysHandler.adcSensorHandler.adcBusCurrentOffset = 0;
 		
-		if(bldcSysHandler.bldcSensorlessHandler.CWCCW){
-			BLDC_SwitchTable[0] = BLDC_SwitchTableCW[0];
-			BLDC_SwitchTable[1] = BLDC_SwitchTableCW[1];
-			BLDC_SwitchTable[2] = BLDC_SwitchTableCW[2];
-			BLDC_SwitchTable[3] = BLDC_SwitchTableCW[3];
-			BLDC_SwitchTable[4] = BLDC_SwitchTableCW[4];
-			BLDC_SwitchTable[5] = BLDC_SwitchTableCW[5];
-		}else{
-			BLDC_SwitchTable[0] = BLDC_SwitchTableCCW[0];
-			BLDC_SwitchTable[1] = BLDC_SwitchTableCCW[1];
-			BLDC_SwitchTable[2] = BLDC_SwitchTableCCW[2];
-			BLDC_SwitchTable[3] = BLDC_SwitchTableCCW[3];
-			BLDC_SwitchTable[4] = BLDC_SwitchTableCCW[4];
-			BLDC_SwitchTable[5] = BLDC_SwitchTableCCW[5];
-		}
+		/*复位bldcAudioHandler*/
+		bldcAudioHandler.audioToPlay = (BLDC_MotorTone*)0;
+		bldcAudioHandler.index = 0;
+		bldcAudioHandler.inTotal = 0;
+		bldcAudioHandler.count = 0;
+		bldcAudioHandler.audioStatus = eAudio_Init;
+		
+		/**/
+		BLDC_AudioInit((BLDC_MotorTone*)motorAudio_0,28);
 }
 /*******************************************************************************
  函数名称：    void BLDC_LowSpeedTask(void)
@@ -404,4 +493,6 @@ void BLDC_ZeroCrossCompTask(void)
 			BLDC_Run_Mode_COMP_Int();
 		}else return;
 }
+
+
 
