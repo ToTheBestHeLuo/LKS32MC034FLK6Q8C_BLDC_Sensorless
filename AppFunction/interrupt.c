@@ -27,12 +27,12 @@
  *******************************************************************************/
 void ADC_IRQHandler(void)
 {
-//		GPIO_ResetBits(GPIO1,GPIO_Pin_5);
+//		GPIO_ResetBits(GPIO1,GPIO_Pin_3);
 		if(ADC_GetIRQFlag(ADC,ADC_EOS0_IRQ_EN)){  /*判断是否ADC第一段采样完成中断*/
 			ADC_ClearIRQFlag(ADC,ADC_EOS0_IRQ_IF);/*清除ADC第一段采样完成中断标志位*/
 			BLDC_LowSpeedTask();
 		}
-//		GPIO_SetBits(GPIO1,GPIO_Pin_5);
+//		GPIO_SetBits(GPIO1,GPIO_Pin_3);
 }
 
 /*******************************************************************************
@@ -69,8 +69,8 @@ void MCPWM0_IRQHandler(void)
 			MCPWM0->PWM_EIF = (BIT4 | BIT5 | BIT6 | BIT7);
 			bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_DriverBrake;
 		}
-		if(MCPWM0->PWM_IF0 & BIT13){
-			MCPWM0->PWM_IF0 = BIT13;
+		if(MCPWM0->PWM_IF0 & BIT0){
+			MCPWM0->PWM_IF0 = BIT0;
 			BLDC_HighSpeedTask();
 		}
 //		GPIO_SetBits(GPIO1,GPIO_Pin_5);
@@ -104,22 +104,20 @@ void MCPWM1_IRQHandler(void)
  *******************************************************************************/
 void HALL_IRQHandler(void)
 {
-		if(HALL->INFO & BIT17){
-			HALL->INFO = BIT17;
-			BLDC_PWM_AllSides_TurnOff();
-			BLDC_RunMode runMode = bldcSysHandler.bldcSensorlessHandler.runMode;
-			if(runMode == eBLDC_Run_Mode_COMP_Polling)
-				bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_RotorBlock;
-			else if(runMode == eBLDC_Run_Mode_COMP_INT)
-				bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_Commutation;
-		
-			/*下列函数调用目的是为了重启电机*/
-			BLDC_HALL_OverFlowInt_TurnOff();
-			BLDC_COMP_Int_TurnOff();
-			BLDC_COMP_Int_SetPolarity_High();
-			BLDC_HALL_SetThreshold_High();
-			BLDC_COMP_SetFilter_LowDelay();
+		HALL->INFO = BIT17;
+		BLDC_RunMode runMode = bldcSysHandler.bldcSensorlessHandler.runMode;
+		if(runMode == eBLDC_Run_Mode_COMP_Polling){
+			bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_RotorBlock;
+		}else if(runMode == eBLDC_Run_Mode_COMP_INT){
+			bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_Commutation;
 		}
+		BLDC_PWM_AllSides_TurnOff();
+		/*下列函数调用目的是为了重启电机*/
+		BLDC_HALL_OverFlowInt_TurnOff();
+		BLDC_COMP_Int_TurnOff();
+		BLDC_COMP_Int_SetPolarity_High();
+		BLDC_HALL_SetThreshold_High();
+		BLDC_COMP_SetFilter_Startup();
 }
 
 /*******************************************************************************
@@ -181,13 +179,10 @@ void SW_IRQHandler(void)
  2021/11/15      V1.0        HuangMG        创建
  *******************************************************************************/
 void CMP_IRQHandler(void)
-{
-//		GPIO_ResetBits(GPIO1,GPIO_Pin_5);
-		if(CMP->IF & BIT0){
-			CMP->IF = BIT0;
-			BLDC_ZeroCrossCompTask();
-		}
-//		GPIO_SetBits(GPIO1,GPIO_Pin_5);
+{	
+		GPIO_ResetBits(GPIO1,GPIO_Pin_3);
+		BLDC_ZeroCrossCompTask();
+		GPIO_SetBits(GPIO1,GPIO_Pin_3);
 }
 
 /*******************************************************************************

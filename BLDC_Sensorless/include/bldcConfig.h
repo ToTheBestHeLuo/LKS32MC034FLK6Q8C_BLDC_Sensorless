@@ -32,7 +32,7 @@ typedef struct{
 	uint8_t motorStartupInitialCycle;
 	/*开环起动，电机的最终周期*/
 	uint8_t motorStartupFinalCycle;
-	/*开环起动，电机的定位时长*/
+	/*开环起动，电机的定位时长，实际写入为 x * 12*/
 	uint8_t motorStartupFixedCycle;
 	/*开环起动，电机旋转多少个电气步数进入闭环（6个电气步数为1个完整的电气圈数）*/
 	uint8_t motorStartupRotateStep;
@@ -79,12 +79,12 @@ STI int32_t BLDC_Div(int32_t dividend,int32_t divisor)
 /*在这里设定指示温度过高的函数*/
 STI bool BLDC_TEMP_Temperature_TooHigh(int16_t adcData)
 {
-		return (adcData < 1000) ? true : false;
+		return (adcData < (1000 >> 4)) ? true : false;
 }
 /*在这里设定指示温度过低的函数*/
 STI bool BLDC_TEMP_Temperature_TooLow(int16_t adcData)
 {
-		return (adcData > 15000) ? true : false;
+		return (adcData > (15000 >> 4)) ? true : false;
 }
 
 /*====================与GPIO相关的函数设定=======================*/
@@ -101,6 +101,7 @@ STI bool BLDC_GPIO_MotorControl(void)
 }
 
 /*====================与HALL计数器相关的函数设定）=======================*/
+
 
 /*在这里设定HALL计数器溢出上限的函数，高阈值检测窗口*/
 STI void BLDC_HALL_SetThreshold_High(void)
@@ -145,14 +146,14 @@ STI void BLDC_HALL_SetThreshold(uint32_t threshold)
 
 /*====================与COMP相关的函数设定=======================*/
 
-/*在这里设定调整COMP硬件滤波器时钟的函数：低延迟特性，用于电机开环启动环节*/
-STI void BLDC_COMP_SetFilter_LowDelay(void)
+/*在这里设定调整COMP硬件滤波器时钟的函数：用于电机开环启动环节*/
+STI void BLDC_COMP_SetFilter_Startup(void)
 {
 		CMP->TCLK &= ~(BIT0 | BIT1 | BIT2 | BIT4 | BIT5 | BIT6 | BIT7);
 		CMP->TCLK |= (motorFlashData.motorPar.motorStartup_ZC_Filter1 << 4) | motorFlashData.motorPar.motorStartup_ZC_Filter2;
 }
-/*在这里设定调整COMP硬件滤波器时钟的函数：高延迟特性，用于电机闭环运行环节*/
-STI void BLDC_COMP_SetFilter_HighDelay(void)
+/*在这里设定调整COMP硬件滤波器时钟的函数：用于电机闭环运行环节*/
+STI void BLDC_COMP_SetFilter_Run(void)
 {
 		CMP->TCLK &= ~(BIT0 | BIT1 | BIT2 | BIT4 | BIT5 | BIT6 | BIT7);
 		CMP->TCLK |= (motorFlashData.motorPar.motorRun_ZC_Filter1 << 4) | motorFlashData.motorPar.motorRun_ZC_Filter2;
@@ -187,18 +188,33 @@ STI bool BLDC_COMP_GetPolarity(void)
 {
 		return !(CMP->CFG & BIT0);
 }
+/*在这里设定清COMP中断标志位的函数*/
+STI void BLDC_COMP_ClearIntFlag(void)
+{
+		CMP->IF = 0x3;
+}
+/*在这里设定关闭比较输入的函数*/
+STI void BLDC_COMP_TurnOff(void)
+{
+		CMP->CFG &= ~(BIT0);
+}
+/*在这里设定打开比较输入的函数*/
+STI void BLDC_COMP_TurnOn(void)
+{
+		CMP->CFG |= (BIT0);
+}
 
 /*====================与PWM相关的函数设定=======================*/
 
 /*在这里设定打开PWM中断的函数*/
 STI void BLDC_PWM_Int_TurnOn(void)
 {
-		MCPWM0->PWM_IE0 |= BIT13;
+		MCPWM0->PWM_IE0 |= BIT0;
 }
 /*在这里设定关闭PWM中断的函数*/
 STI void BLDC_PWM_Int_TurnOff(void)
 {
-		MCPWM0->PWM_IE0 &= ~BIT13;
+		MCPWM0->PWM_IE0 &= ~BIT0;
 }
 
 #define MCPWM_UPDATE_MASK (0xFFFFFFFF & ~(BIT15 | BIT14))
@@ -231,7 +247,6 @@ STI void BLDC_PWM_LowSides_TurnOn(void)
 {
 		MCPWM0->PWM_TH00 = MCPWM0->PWM_TH10 = MCPWM0->PWM_TH20 = (uint16_t)-PWM_PERIOD_COUNT;
 		MCPWM0->PWM_TH01 = MCPWM0->PWM_TH11 = MCPWM0->PWM_TH21 = (uint16_t)+PWM_PERIOD_COUNT;
-		MCPWM0->PWM_CNT0 = MCPWM0->PWM_CNT1 = 0;
 		MCPWM0->PWM_UPDATE = MCPWM_UPDATE_MASK;
 }
 /*在这里设定PWM三相的所有上桥臂与下桥臂的占空比为0*/
@@ -293,6 +308,12 @@ STI void BLDC_PWM_WH_VL(const uint16_t pwmCount)
 
 /*====================与ADC采样相关的函数设定===================*/
 
+/*在这里设定触发ADC采样的时刻的函数*/
+STI void BLDC_SetADCTriggerPoint(int16_t triggerPoint)
+{
+		MCPWM0->PWM_TMR3 = (uint16_t)(triggerPoint / 2 - 600);
+}
+
 /*在这里设定获取母线电压的函数*/
 STI uint32_t BLDC_GetBusVoltage(void)
 {
@@ -316,6 +337,7 @@ typedef enum{
 		eBLDC_Sys_WaitBusAndTemp,
 		eBLDC_Sys_WaitCapCharge,
 		eBLDC_Sys_LoadMotorParameter,
+		eBLDC_Sys_StartupAudio,
 		eBLDC_Sys_WaitStart,
 		eBLDC_Sys_Polling
 }BLDC_SysStatus;
@@ -367,7 +389,7 @@ typedef struct{
 		uint32_t highSpeedCounter;
 		BLDC_ADCSensorHandler adcSensorHandler;
 		BLDC_SensorlessHandler bldcSensorlessHandler;
-		uint16_t counter;
+		uint8_t counter;
 }BLDC_SysHandler;
 
 typedef enum{
@@ -409,7 +431,7 @@ extern BLDC_SysHandler bldcSysHandler;
 extern void BLDC_LowSpeedTask(void);
 extern void BLDC_HighSpeedTask(void);
 extern void BLDC_ZeroCrossCompTask(void);
-extern void BLDC_DelayCommutationTask(void);
+extern void BLDC_CommutationHallTask(void);
 
 #endif
 

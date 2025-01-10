@@ -188,17 +188,18 @@ void GPIO_init(void)
     GPIO_InitTypeDef GPIO_InitStruct;
     GPIO_StructInit(&GPIO_InitStruct);
 	
-		/*Debug专用的IO1*/
+		/*P1.3 Debug专用*/
 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5;
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
     GPIO_Init(GPIO1, &GPIO_InitStruct);
 	
-    /*P1.3 TIM1_CH0*/
+    /*P1.5 TIM1_CH1*/
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN; /*GPIO输入模式*/
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;     /*P1.3*/
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5;     /*P1.5*/
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;  /*上拉功能*/
+		GPIO_InitStruct.GPIO_PODEna = ENABLE;			/*使能开漏输出*/
     GPIO_Init(GPIO1, &GPIO_InitStruct);
-    GPIO_PinAFConfig(GPIO1, GPIO_PinSource_3, AF8_TIMER1); /*IO复用UTIMER功能*/
+    GPIO_PinAFConfig(GPIO1, GPIO_PinSource_5, AF8_TIMER1); /*IO复用UTIMER功能*/
 	
 		/*按键触发Motor的IO*/
 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
@@ -445,7 +446,7 @@ void ADC0_init(void)
     ADC_InitTypeDef ADC_InitStructure;
 
     ADC_StructInit(&ADC_InitStructure);               /*ADC初始化结构体*/
-    ADC_InitStructure.Align = ADC_LEFT_ALIGN;         /* ADC数据输出左对齐*/
+    ADC_InitStructure.Align = ADC_RIGHT_ALIGN;         /* ADC数据输出右对齐*/
     ADC_InitStructure.Trigger_Mode = ADC_1SEG_TRG;    /* 设置ADC转换模式为1段式采样 */
     ADC_InitStructure.FirSeg_Ch = ADC_3_TIMES_SAMPLE; /* 第一段共采样3个通道 */
     ADC_InitStructure.Trigger_Cnt = 15;                /* 单段触发模式下触发一次采样所需要的事件数:
@@ -489,11 +490,8 @@ void MCPWM_init(void)
     MCPWM_InitStructure.MCPWM_WorkModeCH2 = EDGE_PWM_MODE;
     MCPWM_InitStructure.MCPWM_WorkModeCH3 = EDGE_PWM_MODE;
 
-//    /* 自动更新使能寄存器 MCPWM_TH00 自动加载使能 MCPWM_TMR0 自动加载使能 MCPWM_0TH 自动加载使能 MCPWM_0CNT 自动加载使能*/
-//    MCPWM_InitStructure.AUEN = TH00_AUEN | TH01_AUEN | TH10_AUEN | TH11_AUEN |
-//                               TH20_AUEN | TH21_AUEN | TH30_AUEN | TH31_AUEN |
-//                               TMR0_AUEN | TMR1_AUEN | TMR2_AUEN | TMR3_AUEN | 
-//	                             TH0_AUEN |TH1_AUEN;
+    /* 自动更新使能寄存器 MCPWM_TMR3*/
+    MCPWM_InitStructure.AUEN = TMR3_AUEN;
 
 	  MCPWM_InitStructure.MCPWM_Base0T0_UpdateEN = DISABLE;  /* MCPWM 时基0 T0事件更新 使能 */
     MCPWM_InitStructure.MCPWM_Base0T1_UpdateEN = DISABLE; /* MCPWM 时基0 T1事件更新 禁止*/
@@ -507,9 +505,9 @@ void MCPWM_init(void)
     MCPWM_InitStructure.TimeBase0_PERIOD = PWM_PERIOD;           /* 时期0周期设置 */
     MCPWM_InitStructure.TimeBase1_PERIOD = PWM_PERIOD;           /* 时期1周期设置 */
 		
-    MCPWM_InitStructure.TriggerPoint3 = (u16)(-1100); 		/* MCPWM_TMR3 触发事件T3 设置 */
+    MCPWM_InitStructure.TriggerPoint3 = (u16)(-1200); 		/* MCPWM_TMR3 触发事件T3 设置 */
 		MCPWM_InitStructure.TMR3_TimeBase_Sel = 0;						/* 选择时基0作为TMR3事件的触发点*/ 
-		MCPWM_InitStructure.CNT0_TMR3_Match_INT_EN = ENABLE;	/* MCPWM_TMR3 时基0TMR3匹配中断 使能 */
+		MCPWM_InitStructure.CNT0_T0_Update_INT_EN = ENABLE;	/* CNT0对应的更新中断使能 */
 
     MCPWM_InitStructure.DeadTimeCH0123N = DEADTIME; /* CH0123N死区时间设置 */
     MCPWM_InitStructure.DeadTimeCH0123P = DEADTIME; /* CH0123P死区时间设置 */

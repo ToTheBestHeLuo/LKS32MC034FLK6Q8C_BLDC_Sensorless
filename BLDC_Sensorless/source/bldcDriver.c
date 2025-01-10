@@ -37,25 +37,25 @@ static void BLDC_LoadFlashData_Static(void)
 			.escID = 0x1234,
 			.motroDuty_Max = 200,
 			.motroDuty_Min = 14,
-			.motorBeepVolumeDuty = 10,
+			.motorBeepVolumeDuty = 50,
 			.motorStartupDuty = 14,
 			
-			.motorStartupInitialCycle = 120,
+			.motorStartupInitialCycle = 250,
 			.motorStartupFinalCycle = 30,
 			.motorStartupFixedCycle = 255,
 			
 			.motorStartupRotateStep = 255,
-			.motorStartup_ZC_Filter1 = 7,
+			.motorStartup_ZC_Filter1 = 5,
 			.motorStartup_ZC_Filter2 = 0,
-			.motorStartup_BlockThreshold = 12,
+			.motorStartup_BlockThreshold = 15,
 			
-			.motorRun_ZC_Filter1 = 5,
+			.motorRun_ZC_Filter1 = 7,
 			.motorRun_ZC_Filter2 = 0,
 			.mototRunThrottle_SpeedUpRate = 10,
 			.mototRunThrottle_SlowDownRate = 10,
-			.motorRun_BlockThreshold = 100,
-			.motorRun_SpeedFilterPar1 = 4,
-			.motorRun_SpeedFilterPar2 = 60,
+			.motorRun_BlockThreshold = 200,
+			.motorRun_SpeedFilterPar1 = 1,
+			.motorRun_SpeedFilterPar2 = 63,
 			.motorRun_SpeedFilterPar3 = 6,
 			.motorRun_CWCCW = true
 		};
@@ -71,10 +71,11 @@ static void BLDC_LoadFlashData_Static(void)
 		if(motorFlashData.motorPar.motroDuty_Max > 200) motorFlashData.motorPar.motroDuty_Max = 200;
 		if(motorFlashData.motorPar.motroDuty_Min > 200) motorFlashData.motorPar.motroDuty_Min = 200;
 		
-		/*检查起动占空比是否合法，如果不合法，给定一个默认值*/
 		if(motorFlashData.motorPar.motorStartupDuty > 200){
 			motorFlashData.motorPar.motorStartupDuty = 200;
 		}
+		
+		if(motorFlashData.motorPar.motorBeepVolumeDuty > 200) motorFlashData.motorPar.motorBeepVolumeDuty = 200;
 		
 		/*检查ZC滤波器参数*/
 		if(motorFlashData.motorPar.motorStartup_ZC_Filter1 > 15){
@@ -112,8 +113,6 @@ static void BLDC_LoadFlashData_Static(void)
 		bldcSysHandler.bldcSensorlessHandler.commutationFilter1 = motorFlashData.motorPar.motorRun_SpeedFilterPar1;
 		bldcSysHandler.bldcSensorlessHandler.commutationFilter2 = motorFlashData.motorPar.motorRun_SpeedFilterPar2;
 		bldcSysHandler.bldcSensorlessHandler.commutationScaler = motorFlashData.motorPar.motorRun_SpeedFilterPar3;
-		
-		bldcSysHandler.bldcSensorlessHandler.pwmCountTarget = -900;
 		
 		if(bldcSysHandler.bldcSensorlessHandler.CWCCW){
 			BLDC_SwitchTable[0] = BLDC_SwitchTableCW[0];
@@ -195,7 +194,7 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 		switch(bldcSysHandler.bldcSensorlessHandler.runStatus){
 			case eBLDC_Run_Audio:
 				if(bldcAudioHandler.audioStatus == eAudio_WaitPlay){
-					BLDC_SwitchTable[0]((uint16_t)motorFlashData.motorPar.motorBeepVolumeDuty);
+					BLDC_SwitchTable[0]((uint16_t)motorFlashData.motorPar.motorBeepVolumeDuty * 12 - 1200);
 					bldcAudioHandler.audioStatus = eAudio_NoPlay;
 				}else if(bldcAudioHandler.audioStatus == eAudio_NoPlay){
 					BLDC_SwitchTable[0]((uint16_t)-1200);
@@ -218,7 +217,6 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 					if(bldcSysHandler.highSpeedCounter++ == 20000){
 						bldcAudioHandler.audioStatus = eAudio_Init;
 						bldcSysHandler.highSpeedCounter = 0;
-						BLDC_AudioInit((BLDC_MotorTone*)motorAudio_0,sizeof(motorAudio_0) / sizeof(BLDC_MotorTone));
 					}
 				}
 				break;
@@ -235,7 +233,7 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 					bldcSysHandler.highSpeedCounter = 0u;
 					bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
 					if(bldcSysHandler.bldcSensorlessHandler.speedUpCycle-- < bldcSysHandler.bldcSensorlessHandler.speedUpFinalCycle){
-						BLDC_COMP_SetFilter_LowDelay();
+						BLDC_COMP_SetFilter_Startup();
 						bldcSysHandler.counter = 0u;
 						
 						/*在这里打开电机的堵转保护功能*/
@@ -275,7 +273,7 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 				}
 				if(bldcSysHandler.counter == bldcSysHandler.bldcSensorlessHandler.startupRotateStep){
 					bldcSysHandler.counter = 0u;
-					BLDC_COMP_SetFilter_HighDelay();
+					BLDC_COMP_SetFilter_Run();
 					bldcSysHandler.bldcSensorlessHandler.comparePolarity ? BLDC_COMP_Int_SetPolarity_Low() : BLDC_COMP_Int_SetPolarity_High();
 					bldcSysHandler.bldcSensorlessHandler.runMode = eBLDC_Run_Mode_COMP_INT;
 					BLDC_PWM_Int_TurnOff();
@@ -296,21 +294,18 @@ static void BLDC_Run_Mode_COMP_Polling(void)
  *******************************************************************************/
 static void BLDC_Run_Mode_COMP_Int(void)
 {
+		BLDC_COMP_GetPolarity() ? BLDC_COMP_Int_SetPolarity_Low() : BLDC_COMP_Int_SetPolarity_High();
 		bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
+		BLDC_SetADCTriggerPoint(bldcSysHandler.bldcSensorlessHandler.pwmCount);
 		BLDC_SwitchTable[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)bldcSysHandler.bldcSensorlessHandler.pwmCount);
-	
-		BLDC_COMP_Int_TurnOff();
-		CMP->IF = 0x3;
+
+		BLDC_COMP_ClearIntFlag();
 	
 		bldcSysHandler.bldcSensorlessHandler.commutationTime = (BLDC_HALL_GetCounter() * bldcSysHandler.bldcSensorlessHandler.commutationFilter1 \
 																														+ bldcSysHandler.bldcSensorlessHandler.commutationFilter2 * bldcSysHandler.bldcSensorlessHandler.commutationTime) \
 																														>> bldcSysHandler.bldcSensorlessHandler.commutationScaler;
-		bldcSysHandler.bldcSensorlessHandler.estSpeedHz = BLDC_Div(8000000,bldcSysHandler.bldcSensorlessHandler.commutationTime);
-	
 		BLDC_HALL_ResetCounter();
-	
-		BLDC_COMP_GetPolarity() ? BLDC_COMP_Int_SetPolarity_Low() : BLDC_COMP_Int_SetPolarity_High();
-	
+		bldcSysHandler.bldcSensorlessHandler.estSpeedHz = BLDC_Div(8000000,bldcSysHandler.bldcSensorlessHandler.commutationTime);
 		if(bldcSysHandler.bldcSensorlessHandler.pwmCount < bldcSysHandler.bldcSensorlessHandler.pwmCountTarget && bldcSysHandler.counter++ > bldcSysHandler.bldcSensorlessHandler.speedUpTimeCost){
 			bldcSysHandler.counter = 0u;
 			bldcSysHandler.bldcSensorlessHandler.pwmCount++;
@@ -318,8 +313,6 @@ static void BLDC_Run_Mode_COMP_Int(void)
 			bldcSysHandler.counter = 0u;
 			bldcSysHandler.bldcSensorlessHandler.pwmCount--;
 		}
-
-		BLDC_COMP_Int_TurnOn();
 }
 /*******************************************************************************
  函数名称：    static void BLDC_SysReset(void)
@@ -336,7 +329,7 @@ static void BLDC_SysReset(void)
 		bldcSysHandler.counter = 0u;
 	
 		bldcSysHandler.bldcSensorlessHandler.sector = 0u;
-		bldcSysHandler.bldcSensorlessHandler.runStatus = eBLDC_Run_Alignment;
+		bldcSysHandler.bldcSensorlessHandler.runStatus = eBLDC_Run_Audio;
 		bldcSysHandler.bldcSensorlessHandler.runMode = eBLDC_Run_Mode_Wait;
 		bldcSysHandler.bldcSensorlessHandler.comparePolarity = true;
 		bldcSysHandler.bldcSensorlessHandler.commutationTime = 0;
@@ -358,16 +351,12 @@ static void BLDC_SysReset(void)
 		bldcSysHandler.adcSensorHandler.adcBusCurrent = 0;
 		bldcSysHandler.adcSensorHandler.adcBusCurrentOffset = 0;
 		
-		
 		/*复位bldcAudioHandler*/
 		bldcAudioHandler.audioToPlay = (BLDC_MotorTone*)0;
 		bldcAudioHandler.index = 0;
 		bldcAudioHandler.inTotal = 0;
 		bldcAudioHandler.count = 0;
 		bldcAudioHandler.audioStatus = eAudio_Init;
-		
-		/**/
-		BLDC_AudioInit((BLDC_MotorTone*)motorAudio_0,sizeof(motorAudio_0) / sizeof(BLDC_MotorTone));
 }
 /*******************************************************************************
  函数名称：    void BLDC_LowSpeedTask(void)
@@ -417,11 +406,18 @@ void BLDC_LowSpeedTask(void)
 				break;
 			case eBLDC_Sys_LoadMotorParameter:
 				BLDC_LoadFlashData_Static();
-				bldcSysHandler.sysStatus = eBLDC_Sys_WaitStart;
+				BLDC_AudioInit((BLDC_MotorTone*)motorAudio_0,sizeof(motorAudio_0) / sizeof(BLDC_MotorTone));
+					bldcSysHandler.bldcSensorlessHandler.runMode = eBLDC_Run_Mode_COMP_Polling;
+				bldcSysHandler.sysStatus = eBLDC_Sys_StartupAudio;
+				break;
+			case eBLDC_Sys_StartupAudio:
+				if(bldcAudioHandler.audioStatus == eAudio_Finished){
+					bldcSysHandler.sysStatus = eBLDC_Sys_WaitStart;
+				}
 				break;
 			case eBLDC_Sys_WaitStart:
 				if(BLDC_GPIO_MotorControl()){
-					bldcSysHandler.bldcSensorlessHandler.runMode = eBLDC_Run_Mode_COMP_Polling;
+					bldcSysHandler.bldcSensorlessHandler.runStatus = eBLDC_Run_Alignment;
 					bldcSysHandler.sysStatus = eBLDC_Sys_Polling;
 				}
 				break;
@@ -485,6 +481,7 @@ void BLDC_ZeroCrossCompTask(void)
 			BLDC_Run_Mode_COMP_Int();
 		}else return;
 }
+
 
 
 
