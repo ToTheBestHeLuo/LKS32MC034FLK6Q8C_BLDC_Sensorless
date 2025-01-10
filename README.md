@@ -67,3 +67,10 @@
 实验电机型号2250，KV2450，16V供电，5*4*3的三叶桨。当进入75%左右的油门值时，其电流会出现急剧飙升，同时电机的声音会出现较大变化，参考值为：70%油门，16.31A，80%油门，20.13A。目前暂不知道这是否属于正常现象。
 ### 更改内容
 调整motorFlashData.motorPar中所有类型为uint8_t，但某些量要乘以固定系数才是真实量。
+## 2025.1.10
+### 异常描述
+文件bldcDriver.c中BLDC_Run_Mode_COMP_Int()函数中调整过零触发的代码段BLDC_COMP_GetPolarity() ? BLDC_COMP_Int_SetPolarity_Low() : BLDC_COMP_Int_SetPolarity_High(); 的不同位置导致了换相信号的提前出现。
+### 解决措施
+将代码段放置于函数最开始处。
+### 新增内容
+开机提示音。
