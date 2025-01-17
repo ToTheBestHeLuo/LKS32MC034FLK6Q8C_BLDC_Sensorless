@@ -28,6 +28,7 @@ typedef struct
    u16 nOffsetB;   /**< ÎÂ¶ÈÏµÊýÆ«ÖÃ*/
 } Stru_TempertureCof_Def;
 
+extern Stru_TempertureCof_Def m_TempertureCof;
 
 void TempSensor_Init(void);
 s16 GetCurrentTemperature(s16 ADC_value);

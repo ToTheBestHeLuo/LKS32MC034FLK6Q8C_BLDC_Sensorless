@@ -14,26 +14,7 @@
 #include "hardware_init.h"
 
 #include "bldcConfig.h"
-/*******************************************************************************
- 函数名称：    void ADC_IRQHandler(void)
- 功能描述：    ADC0中断处理函数
- 输入参数：    无
- 输出参数：    无
- 返 回 值：    无
- 其它说明：
- 修改日期      版本号          修改人            修改内容
- -----------------------------------------------------------------------------
- 2021/11/15      V1.0        HuangMG        创建
- *******************************************************************************/
-void ADC_IRQHandler(void)
-{
-//		GPIO_ResetBits(GPIO1,GPIO_Pin_3);
-		if(ADC_GetIRQFlag(ADC,ADC_EOS0_IRQ_EN)){  /*判断是否ADC第一段采样完成中断*/
-			ADC_ClearIRQFlag(ADC,ADC_EOS0_IRQ_IF);/*清除ADC第一段采样完成中断标志位*/
-			BLDC_LowSpeedTask();
-		}
-//		GPIO_SetBits(GPIO1,GPIO_Pin_3);
-}
+#include "sGSlave.h"
 
 /*******************************************************************************
  函数名称：    void DMA_IRQHandler(void)
@@ -48,7 +29,103 @@ void ADC_IRQHandler(void)
  *******************************************************************************/
 void DMA_IRQHandler(void)
 {
+		TIMER1->CFG &= ~(BIT31);
+		DMA_IF = 0xf;DMA_IE = 0;TIMER1->IF = 0x7;
+		if(sG.isSendOrReceive){
+//			GPIO_ResetBits(GPIO1,GPIO_Pin_3);
+			sG.isSendOrReceive = false;
+			/*调整IO为输入模式*/
+			GPIO1->POE &= ~(BIT5);
+			GPIO1->PIE |= (BIT5);
+			/*调整DMA配置*/
+			sG_DMA_Switch2Receive();
+			/*调整计数门限*/
+			TIMER1->TH = UINT32_MAX;
+			TIMER1->CNT = 1;
+			TIMER1->CMPT0 = 160 * 3 - 1;
+			/*调整为捕获输入模式*/
+			TIMER1->CFG |= (BIT10);
+			/*开比较中断*/
+			TIMER1->IE = (BIT0);
+		}else{
+			sG.isSendOrReceive = true;
+			sG_ProtocolProcess(&sG.transmitData);
+			/*校验成功，进入发送状态*/
+			sG_TransmitWithDMA(sG.transmitData);
+			/*调整DMA配置*/
+			sG_DMA_Switch2Transmit();
+			TIMER1->TH = UINT32_MAX;
+			TIMER1->CMPT0 = 160 * 3 - 1; /*延迟发送*/
+			TIMER1->CNT = 1;
+			/*打开比较中断*/
+			TIMER1->IE = (BIT0);			
+		}
+		sG.isSendOrReceiveFinished = true;
+		TIMER1->CFG |= (BIT31);
+}
 
+/*******************************************************************************
+ 函数名称：    void TIMER1_IRQHandler(void)
+ 功能描述：    TIMER1中断处理函数
+ 输入参数：    无
+ 输出参数：    无
+ 返 回 值：    无
+ 其它说明：
+ 修改日期      版本号          修改人            修改内容
+ -----------------------------------------------------------------------------
+ 2022/4/14     V1.0          HuangMG             创建
+ *******************************************************************************/
+void TIMER1_IRQHandler(void)
+{
+		TIMER1->CFG &= (~BIT31);
+		TIMER1->IF = 0x7;
+		if(sG.isSendOrReceive){
+			/*调整IO为输出模式*/
+			TIMER1->CMPT1 = 0;
+			TIMER1->TH = 160 - 1;
+			TIMER1->CNT = 1;
+			TIMER1->IE = (BIT10);
+			GPIO1->PIE &= ~(BIT5);
+			GPIO1->POE |= (BIT5);
+			/*调整为比较输出模式*/
+			TIMER1->CFG &= ~(BIT10);
+			/*开DMA中断*/
+			DMA_IE = 1;
+			/*DMA传输：发送模式*/
+			DMA_CH0->DMA_CTMS = 18;    /*配置DMA搬运轮数或次数*/
+			DMA_CH0->DMA_CCR  |= BIT0;/*使能DMA搬运*/
+		}else{
+			/*进入接收状态*/
+			/*使能比较信号触发DMA传送并关闭比较中断*/
+			TIMER1->IE = (BIT8);
+			TIMER1->CMPT0 = 80 - 1;
+			/*开DMA中断*/
+			DMA_IE = 1;
+			/*DMA传输：接收模式*/
+			DMA_CH0->DMA_CTMS = 16;    /*配置DMA搬运轮数或次数*/
+			DMA_CH0->DMA_CCR  |= BIT0;/*使能DMA搬运*/
+		}
+		sG.isSendOrReceiveFinished = false;
+		TIMER1->CFG |= (BIT31);
+}
+
+/*******************************************************************************
+ 函数名称：    void ADC_IRQHandler(void)
+ 功能描述：    ADC0中断处理函数
+ 输入参数：    无
+ 输出参数：    无
+ 返 回 值：    无
+ 其它说明：
+ 修改日期      版本号          修改人            修改内容
+ -----------------------------------------------------------------------------
+ 2021/11/15      V1.0        HuangMG        创建
+ *******************************************************************************/
+void ADC_IRQHandler(void)
+{
+		if(ADC_GetIRQFlag(ADC,ADC_EOS0_IRQ_EN)){  /*判断是否ADC第一段采样完成中断*/
+			ADC_ClearIRQFlag(ADC,ADC_EOS0_IRQ_IF);/*清除ADC第一段采样完成中断标志位*/
+			BLDC_LowSpeedTask();
+		}
 }
 
 /*******************************************************************************
@@ -64,7 +141,6 @@ void DMA_IRQHandler(void)
  *******************************************************************************/
 void MCPWM0_IRQHandler(void)
 {
-//		GPIO_ResetBits(GPIO1,GPIO_Pin_5);
 		if(MCPWM0->PWM_EIF & BIT5){
 			MCPWM0->PWM_EIF = (BIT4 | BIT5 | BIT6 | BIT7);
 			bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_DriverBrake;
@@ -73,7 +149,6 @@ void MCPWM0_IRQHandler(void)
 			MCPWM0->PWM_IF0 = BIT0;
 			BLDC_HighSpeedTask();
 		}
-//		GPIO_SetBits(GPIO1,GPIO_Pin_5);
 }
 
 /*******************************************************************************
@@ -132,22 +207,6 @@ void HALL_IRQHandler(void)
  2021/11/15      V1.0        HuangMG        创建
  *******************************************************************************/
 void TIMER0_IRQHandler(void)
-{
-
-}
-
-/*******************************************************************************
- 函数名称：    void TIMER1_IRQHandler(void)
- 功能描述：    TIMER1中断处理函数
- 输入参数：    无
- 输出参数：    无
- 返 回 值：    无
- 其它说明：
- 修改日期      版本号          修改人            修改内容
- -----------------------------------------------------------------------------
- 2022/4/14     V1.0          HuangMG             创建
- *******************************************************************************/
-void TIMER1_IRQHandler(void)
 {
 
 }

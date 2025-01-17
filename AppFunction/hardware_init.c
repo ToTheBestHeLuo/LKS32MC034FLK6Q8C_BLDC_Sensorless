@@ -14,6 +14,8 @@
 #include "hardware_init.h"
 #include "delay.h"
 
+#include "sGSlave.h"
+
 /*******************************************************************************
  函数名称：    u8 OPA_CommonVoltageCorrection(void)
  功能描述：    利用硬件的比较器CMP1和DAC完成OPA输出的共模电压的自校正
@@ -90,7 +92,7 @@ void Hardware_init(void)
 {
     __disable_irq();                  /* 关闭中断 中断总开关 */
     SYS_WR_PROTECT = 0x7a83;          /* 开启写使能*/
-		SYS_AFE_REG1 |= 0x2;
+		SYS_AFE_REG1 &= ~BIT1;
     IWDG_DISABLE();                   /* 关闭独立看门狗使能*/
     FLASH_CFG |= 0x00080000;          /* FLASH 预取加速使能*/
     delay_init(48);                   /* 延时函数初始化时钟48MHz*/
@@ -103,22 +105,20 @@ void Hardware_init(void)
     DSP_Cmd(ENABLE);         /* DSP时钟使能*/
 	
 //		volatile u8 cv = OPA_CommonVoltageCorrection();
-	
 		HALL_init();
-	
 	  TempSensor_init();                /* 芯片温度传感器初始化*/
 		PGA_init();                    		/* PGA初始化 */
 		ADC0_init();                   		/* ADC初始化 */
     MCPWM_init();                     /* MCPWM初始化 */
 	
 //	  IWDG_init();                      /* 看门狗初始化*/
-	  delay_us(100);                    /* 延时等待硬件初始化稳定 */
-		
+		delay_ms(50);
+//		
     NVIC_EnableIRQ(HALL_IRQn);      		/* 使能HALL中断 */
     NVIC_SetPriority(HALL_IRQn, 0); 		/* 配置HALL中断优先级 */
 		
     NVIC_EnableIRQ(ADC_IRQn);      		/* 使能ADC中断 */
-    NVIC_SetPriority(ADC_IRQn, 3); 		/* 配置ADC中断优先级 */
+    NVIC_SetPriority(ADC_IRQn, 4); 		/* 配置ADC中断优先级 */
 		
     NVIC_EnableIRQ(CMP_IRQn);      		/* 使能COMP0中断 */
     NVIC_SetPriority(CMP_IRQn, 1); 		/* 配置COMP0优先级 */
@@ -126,13 +126,12 @@ void Hardware_init(void)
     NVIC_EnableIRQ(MCPWM0_IRQn);      		/* 使能MCPWM0中断 */
     NVIC_SetPriority(MCPWM0_IRQn, 0); 		/* 配置FMCPWM0优先级 */
 		
-    NVIC_EnableIRQ(DMA_IRQn);      /* 使能 DMA_IRQn 外部中断*/
-    NVIC_SetPriority(DMA_IRQn,2); /* DMA_IRQn 外部中断优先级设置为1*/
-		
-//    NVIC_EnableIRQ(TIMER1_IRQn);      /* 使能 TIMER1_IRQn 外部中断*/
-//    NVIC_SetPriority(TIMER1_IRQn,2); /* TIMER1_IRQn 外部中断优先级设置为2*/
-		
 	  __enable_irq();                   /* 开启总中断 */
+		
+    NVIC_SetPriority(DMA_IRQn,3); 		/* DMA_IRQn 外部中断优先级设置为4*/
+		
+    NVIC_SetPriority(TIMER1_IRQn,3); /* TIMER1 外部中断优先级设置为3*/
+		
 }
 
 /*******************************************************************************
@@ -186,27 +185,36 @@ void SystemInit(void)
 void GPIO_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct;
-    GPIO_StructInit(&GPIO_InitStruct);
 	
-		/*P1.3 Debug专用*/
+//		/*P1.3 Debug专用，在最新的硬件中不使用*/
+//		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+//    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
+//    GPIO_Init(GPIO1, &GPIO_InitStruct);
+	
+		/*P0.9 LED灯光指示*/
+    GPIO_StructInit(&GPIO_InitStruct);
 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
-    GPIO_Init(GPIO1, &GPIO_InitStruct);
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_9;
+    GPIO_Init(GPIO0, &GPIO_InitStruct);
+		GPIO_SetBits(GPIO0,GPIO_Pin_9);
+	
+		/*P0.0 ADC通道10 上电默认为AIN*/
+    GPIO_StructInit(&GPIO_InitStruct);
+		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_ANA;
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0;
+    GPIO_Init(GPIO0, &GPIO_InitStruct);		
 	
     /*P1.5 TIM1_CH1*/
+    GPIO_StructInit(&GPIO_InitStruct);
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN; /*GPIO输入模式*/
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5;     /*P1.5*/
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;  /*上拉功能*/
 		GPIO_InitStruct.GPIO_PODEna = ENABLE;			/*使能开漏输出*/
     GPIO_Init(GPIO1, &GPIO_InitStruct);
     GPIO_PinAFConfig(GPIO1, GPIO_PinSource_5, AF8_TIMER1); /*IO复用UTIMER功能*/
-	
-		/*按键触发Motor的IO*/
-		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_6;
-    GPIO_Init(GPIO1, &GPIO_InitStruct);
 
     /* MCPWM_CH0~MCPWM_CH2 P0.10~P0.15 */
+    GPIO_StructInit(&GPIO_InitStruct);
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11 \
 	  | GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
@@ -219,6 +227,7 @@ void GPIO_init(void)
     GPIO_PinAFConfig(GPIO0, GPIO_PinSource_15, AF3_MCPWM);
 		
 		/*预驱的使能IO*/
+    GPIO_StructInit(&GPIO_InitStruct);
 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_1;
     GPIO_Init(GPIO1, &GPIO_InitStruct);
@@ -239,9 +248,9 @@ void DAC_init(void)
 		DAC_InitTypeDef DAC_InitStructure;
 		
 		DAC_StructInit(&DAC_InitStructure);
-		DAC_InitStructure.DACOUT_EN = ENABLE ;//使能DAC电压通过P0.0输出
+		DAC_InitStructure.DACOUT_EN = DISABLE ;//禁止DAC电压通过P0.0输出
 		DAC_Init(&DAC_InitStructure);        /* DAC初始化 */
-		DAC_OutputVoltage((1.9f + 40.f / 0.5f * 0.01f) * BIT12);  /* DAC输出，每0.01V对应0.5A过流保护阈值*/
+		DAC_OutputVoltage((1.9f + 10.f / 0.5f * 0.01f) * BIT12);  /* DAC输出，每0.01V对应0.5A过流保护阈值*/
 }
 /*******************************************************************************
  函数名称：    void UTimer_init(void)
@@ -256,51 +265,35 @@ void DAC_init(void)
  *******************************************************************************/
 void UTimer_init(void)
 {
-    TIM_TimerInitTypeDef TIM_InitStruct;
+		TIM_TimerInitTypeDef TIM_InitStruct;
     TIM_TimerStrutInit(&TIM_InitStruct); /* Timer结构体变量初始化 */
 
+    TIM_InitStruct.TH = 0xFFFFFFFF;  
+                 
     TIM_InitStruct.CLK_DIV = TIM_Clk_Div1;      /* 设置Timer模块数据分频系数 */
-    TIM_InitStruct.CH0_MODE = TIMER_OPMode_CMP; /* 设置Timer CH0为比较模式*/
+    TIM_InitStruct.CH1_MODE = TIMER_OPMode_CAP; /* 设置Timer CH1为捕获，后续也会切换到比较模式*/
+		TIM_InitStruct.CH1_FE_CAP_EN = ENABLE;			/* 先使用到CH1的捕获模式，这里给出一个预设值，也即下降沿触发捕获 */
+		TIM_InitStruct.CAP1_CLR_EN = ENABLE;				/* 使能捕获模式下的清零功能 */ 
     TIM_InitStruct.CH0_POL = 0;                 /* 计数器回零时，比较模式输出极性控制*/
-    TIM_InitStruct.TH = 48000 - 1;                  /* 设置计数器计数模值1KHz*/
-    TIM_InitStruct.TIM_CMP0 = 24000;            /* 设置比较模式的CH0比较值 1KHz */
-    TIM_TimerInit(TIMER0, &TIM_InitStruct);
+		TIM_InitStruct.CH1_POL = 0;
+    TIM_InitStruct.TIM_CMP1 = 1 - 1;            /* 设置比较模式的CH1比较值*/
 	
-    TIM_TimerStrutInit(&TIM_InitStruct); /* Timer结构体变量初始化 */
+		TIM_InitStruct.CH0_MODE = TIMER_OPMode_CMP;			/* CH0作为比较模式 */
+		TIM_InitStruct.TIM_CMP0 = 160 * 3 - 1;
 	
-		TIM_ClearIRQFlag(TIMER1, TIM_IRQ_IF_CH0);
-		TIM_ClearIRQFlag(TIMER1, TIM_IRQ_IF_ZC);
+		TIM_InitStruct.FLT = 1;
+			
+		TIM_InitStruct.IE = TIM_IRQ_IE_CH0; 					/*开启比较中断*/
 	
-		/*注意：CH1需要映射到一个物理IO，而CH0无需开启，只需要使用其比较功能即可*/
-		/*CH0作为比较模式，开启比较中断,当这个比较中断发生后重新设置比较值，同时关断比较中断，使能DMA传输，其中DMA触发信号是CH0的比较信号，比较值设置在sG的Tick的1/2处*/
-		/*CH1用来捕获信号的周期脉宽，上升沿捕获，且发生捕获后自动清零CNT值*/
-	
-		/*当DMA传输完成以后，重新设置CH0的比较值，重新开启CH0的比较中断*/
-
-    TIM_TimerStrutInit(&TIM_InitStruct);        /* Timer结构体变量初始化 */
-	  TIM_InitStruct.CLK_DIV = TIM_Clk_Div1;      /* 设置Timer模块数据分频系数 */
-	
-    TIM_InitStruct.CH0_MODE = TIMER_OPMode_CMP; /* 设置Timer CH0为比较模式*/
-    TIM_InitStruct.TIM_CMP0 = 720;            	/* 设置比较模式的CH0比较值 */
-	
-    TIM_InitStruct.CH1_MODE = TIMER_OPMode_CAP; /* 设置Timer CH1为捕获模式*/
-    TIM_InitStruct.CH1_FE_CAP_EN = DISABLE;      /* 关闭Timer通道1下降沿捕获*/
-    TIM_InitStruct.CH1_RE_CAP_EN = ENABLE;     /* 使能Timer通道1上升沿捕获*/
-    TIM_InitStruct.SRC1 = TIM_SRC1_0;           /* 捕获模式通道1信号来源于Timer通道0的输入信号*/
-    TIM_InitStruct.CAP1_CLR_EN = ENABLE;       /* 当发生CAP1捕获事件时，清零Timer计数器*/
-    TIM_InitStruct.TH = 32767 * 32767 - 1;               			/* 设置计数器计数模值*/
-    TIM_InitStruct.FLT = 1;                     /* 通道 0/1 信号滤波宽度选择，0-255 */
-    
-//    TIM_InitStruct.IE = TIM_IRQ_IE_CH0 | TIM_IRQ_RE_CH0;          /* 使能Timer模块CH0比较中断以及CH0的比较触发DMA请求*/
     TIM_TimerInit(TIMER1, &TIM_InitStruct);
-
-		/*DMA传输的配置*/
+	
+		/*配置对应的DMA信号传送：由软件使能DMA通道，由TIMER1的比较事件触发GPIOx->PDI到sG专用接收缓冲区*/
     DMA_InitTypeDef DMA_InitStruct;
     DMA_StructInit(&DMA_InitStruct);
 		
-		DMA_ClearIRQFlag(CH0_FIF);
+		DMA_ClearIRQFlag(CH1_FIF);
 
-    DMA_InitStruct.DMA_IRQ_EN = ENABLE;             /* DMA 传输完成中断使能 */
+    DMA_InitStruct.DMA_IRQ_EN = DISABLE;             /* DMA传输完成中断禁止 */
     DMA_InitStruct.DMA_CIRC = DISABLE;              /* DMA传输模式：循环模式，高有效 */
     DMA_InitStruct.DMA_SINC = DISABLE;              /* 源地址递增, 高有效,地址按照SBTW对应大小递增 1/2/4*/
     DMA_InitStruct.DMA_DINC = ENABLE;               /* 目的地址递增,高有效,地址按照DBTW对应大小递增 1/2/4*/
@@ -308,8 +301,8 @@ void UTimer_init(void)
     DMA_InitStruct.DMA_DBTW = DMA_HALFWORD_TRANS;   /* 目的访问位宽，0:byte, 1:half-word, 2:word */
     DMA_InitStruct.DMA_REQ_EN = DMA_TIMER1_REQ_EN; 	/* UTimer的DMA请求使能，高有效*/
     DMA_InitStruct.DMA_RMODE = ENABLE;              /* 0:单轮传输，一轮连续传输多次 或 1:多轮，每轮进行一次数据传输*/
-    DMA_InitStruct.DMA_SADR = (u32)0;   /* 设置为GPIO1的输入寄存器的目的地址*/
-    DMA_InitStruct.DMA_DADR = (u32)0;     	/* DMA目的地址设置为DHSOT专用的接收缓冲区*/
+    DMA_InitStruct.DMA_SADR = (u32)&GPIO1->PDI;   /* 设置为GPIO1的输入寄存器的目的地址*/
+    DMA_InitStruct.DMA_DADR = (u32)&sG.receiveBuffer[0];     	/* DMA目的地址设置为DHSOT专用的接收缓冲区*/
     DMA_Init(DMA_CH0, &DMA_InitStruct);							/* 由DMA的通道0完成这个事件*/	
 }
 /*******************************************************************************
@@ -426,7 +419,6 @@ void PGA_init(void)
     OPA_InitStruct.OPA_B_EN = OPA0_IN_IP_B;  /*OPA0使用 OPA0_IN_B/OPA0_IP_B 作为差分输入*/
     OPA_Init(OPA, &OPA_InitStruct);
 
-    /*ADC采集电压OPA_IN * 170/(40 + 1) = OPA_IN * 4.14634*/
     OPA_OUT(OPA, DISABLE); /* 禁止OPA输出通过外部引脚P0.7输出*/
 }
 
@@ -457,8 +449,8 @@ void ADC0_init(void)
     ADC_InitStructure.IE = ADC_EOS0_IRQ_EN;           /* 第一段扫描结束中断*/
     ADC_InitStructure.ADC_SAMP_CLK = 4;              /* 设置采样时间为20个ADC时钟周期 范围4--35*/
     ADC_Init(ADC, &ADC_InitStructure);
-    /* ADC采集OPA0_OUT通道 ， 温度传感器 , 2.4基准电压源*/
-    ADC_CHN0 = ADC_CHANNEL_0 | (ADC_CHANNEL_11 << 4) | (ADC_CHANNEL_13 << 8);
+    /* ADC采集电流（1m欧姆，Gain=20） ， 温度传感器 , 母线电压（43K：1K，Gain=44）*/
+    ADC_CHN0 = ADC_CHANNEL_0 | (ADC_CHANNEL_11 << 4) | (ADC_CHANNEL_10 << 8);
 
     ADC_IF = 0xff;    /*清中断标志位*/
     ADC_CFG |= BIT11; /*状态机复位控制信号*/

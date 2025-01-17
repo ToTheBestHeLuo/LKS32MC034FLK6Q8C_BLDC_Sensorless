@@ -9,59 +9,87 @@
 #include "hardware_init.h"
 
 /*在这里设定母线欠电压和过电压保护时的值*/
-#define BLDC_Bus_UnderVoltage_Protect (1000u)
-#define BLDC_Bus_OverVoltage_Protect (2000u)
+#define BLDC_Bus_UnderVoltage_Protect (140)
+#define BLDC_Bus_OverVoltage_Protect (180)
+
+STI void System_Disable_sG_Int(void)
+{
+		NVIC_DisableIRQ(DMA_IRQn);
+		NVIC_DisableIRQ(TIMER1_IRQn);
+}
+
+STI void System_Enable_sG_Int(void)
+{
+		NVIC_EnableIRQ(DMA_IRQn);
+		NVIC_EnableIRQ(TIMER1_IRQn);
+}
 
 /*下面的结构体为电机的静态参数，这部分参数的调整必须在电机运行前调整。当电机进入运行后，这些参数将被锁定。
 	可以通过复位电机到停机状态后，才可以重新调整静态参数。最后，这部分参数都可以通过sG单线协议进行修改*/
 typedef struct{
-	/*电调的16位ID*/
-	uint16_t escID;
-	/*电机所能达到的最大占空比值，范围[0,+200]，
+	/*电调的8位ID1，不得为0*/
+	uint8_t escID1;
+	/*电调的8位ID2，不得为0*/
+	uint8_t escID2;
+	/*电调的8位ID3，不得为0*/
+	uint8_t escID3;
+	/*电调的8位ID4，不得为0*/
+	uint8_t escID4;
+	/*电机所能达到的最大占空比值，范围[1,+200]，
 		实际写入为 x * 12 - 1200*/
-	uint8_t motroDuty_Max;
-	/*电机所能达到的最小占空比值，范围[0,+200]，
+	uint8_t motorDuty_Max;
+	/*电机所能达到的最小占空比值，范围[1,+200]，
 		实际写入为 x * 12 - 1200*/
-	uint8_t motroDuty_Min;
-	/*电机发出哔哔声的音量，也就是占空比值，且不受上面两个参数的限制，需要注意的是，过大的音量值可能导致损坏电机，范围[0,+200]，
+	uint8_t motorDuty_Min;
+	/*电机发出哔哔声的音量，也就是占空比值，且不受上面两个参数的限制，需要注意的是，过大的音量值可能导致损坏电机，范围[1,+200]，
 		实际写入为 x * 12 - 1200*/
 	uint8_t motorBeepVolumeDuty;
-	/*开环起动，电机的起动占空比，范围[0,+200]，实际写入为 x * 12 - 1200*/
+	/*开环起动，电机的起动占空比，范围[1,+200]，实际写入为 x * 12 - 1200*/
 	uint8_t motorStartupDuty;
-	/*开环起动，电机的起动周期*/
+	/*开环起动，电机的起动周期，不得为0*/
 	uint8_t motorStartupInitialCycle;
-	/*开环起动，电机的最终周期*/
+	/*开环起动，电机的最终周期，不得为0*/
 	uint8_t motorStartupFinalCycle;
-	/*开环起动，电机的定位时长，实际写入为 x * 12*/
+	/*开环起动，电机的定位时长，实际写入为 x * 12，不得为0*/
 	uint8_t motorStartupFixedCycle;
-	/*开环起动，电机旋转多少个电气步数进入闭环（6个电气步数为1个完整的电气圈数）*/
+	/*开环起动，电机旋转多少个电气步数进入闭环（6个电气步数为1个完整的电气圈数），不得为0*/
 	uint8_t motorStartupRotateStep;
 	/*开环起动，过零信号的滤波系数，滤波时长的计算公式为：3MHz除以1+motorStartup_ZC_Filter1）再除以2^(motorStartup_ZC_Filter2)，
-		motorStartup_ZC_Filter1范围[0,15],motorStartup_ZC_Filter2范围[0,7]*/
+		motorStartup_ZC_Filter1范围[1,15],motorStartup_ZC_Filter2范围[1,7]*/
 	uint8_t motorStartup_ZC_Filter1,motorStartup_ZC_Filter2;
 	/*开环起动，堵转检测阈值，其频率为48MHz除以motorStartup_BlockThreshold，若未在这段时间内产生换相信号则认为产生堵转事件,
-		实际写入为 x * 75000*/
+	实际写入为 x * 75000，不得为0*/
 	uint8_t motorStartup_BlockThreshold;
-	/*闭环模式下，过零信号的滤波系数，滤波时长的计算公式为：3MHz除以1+motorStartup_ZC_Filter1）再除以2^(motorStartup_ZC_Filter2)*/
+	/*闭环模式下，过零信号的滤波系数，滤波时长的计算公式为：3MHz除以1+motorStartup_ZC_Filter1）再除以2^(motorStartup_ZC_Filter2)，不得为0*/
 	uint8_t motorRun_ZC_Filter1,motorRun_ZC_Filter2;
 	/*闭环模式下，电机的油门响应速度（也即占空比变化速度），指的是每个Step比较中断下油门的最大变化速度，其中第一个为加速过程、第二个为减速过程
-		需要注意的是，这个值越小，响应速度越快*/
+	需要注意的是，这个值越小，响应速度越快，不得为0*/
 	uint8_t  mototRunThrottle_SpeedUpRate,mototRunThrottle_SlowDownRate;
 	/*闭环模式下，丢步或堵转检测阈值，其频率为48MHz除以motorRun_BlockThreshold，若未在这段时间内产生换相信号则认为产生堵转事件，
-		实际写入为 x * 750*/
+	实际写入为 x * 750，不得为0*/
 	uint8_t motorRun_BlockThreshold;
-	/*闭环模式下，速度滤波器参数，其中应当满足：motorRun_SpeedFilterPar1 + motorRun_SpeedFilterPar2 = (1 << motorRun_SpeedFilterPar3)*/
-	uint8_t motorRun_SpeedFilterPar1,motorRun_SpeedFilterPar2,motorRun_SpeedFilterPar3;
-	/*开环起动以及闭环模式下的默认转向*/
-	bool motorRun_CWCCW;
+	/*闭环模式下，速度滤波器参数，其中应当满足：motorRun_SpeedFilterPar1 + motorRun_SpeedFilterPar2 = (1 << motorRun_SpeedFilterPar3)，不得为0*/
+	uint8_t motorRun_SpeedFilterPar1,motorRun_SpeedFilterPar3;
+	/*开环起动以及闭环模式下的默认转向，1为CW，255为CCW*/
+	uint8_t motorRun_CWCCW;
 }sG_MotorParameterStruct;
+
+#define sectorSize 512
+#define sectorMotorFlashAddr 0x00007C00
 
 typedef union{
 	sG_MotorParameterStruct motorPar;
-	uint8_t sector[512];
+	uint8_t sector[sectorSize];
 }sG_MotorFlashUnion;
 
+#define TOKENPASTE(x, y) x##y
+#define UNIQUE_STATIC_ASSERT_ID TOKENPASTE(_static_assertion_, __LINE__)
+#define STATIC_ASSERT(COND, MSG) typedef char __attribute__((unused)) UNIQUE_STATIC_ASSERT_ID[(COND) ? -1 : 1]
+
+STATIC_ASSERT(sizeof(sG_MotorFlashUnion) > sectorSize,"size of sG_MotorFlashUnion shouldn't be more than 512");
+
 extern sG_MotorFlashUnion motorFlashData;
+extern const sG_MotorFlashUnion slave_MotorData_Sector;
 
 #define PWM_PERIOD_COUNT (1200)
 
@@ -77,14 +105,14 @@ STI int32_t BLDC_Div(int32_t dividend,int32_t divisor)
 /*====================与温度保护相关的函数设定=======================*/
 
 /*在这里设定指示温度过高的函数*/
-STI bool BLDC_TEMP_Temperature_TooHigh(int16_t adcData)
+STI bool BLDC_TEMP_Temperature_TooHigh(int32_t tmp)
 {
-		return (adcData < (1000 >> 4)) ? true : false;
+		return (tmp > 900) ? true : false;
 }
 /*在这里设定指示温度过低的函数*/
-STI bool BLDC_TEMP_Temperature_TooLow(int16_t adcData)
+STI bool BLDC_TEMP_Temperature_TooLow(int32_t tmp)
 {
-		return (adcData > (15000 >> 4)) ? true : false;
+		return (tmp < -100) ? true : false;
 }
 
 /*====================与GPIO相关的函数设定=======================*/
@@ -114,7 +142,7 @@ STI void BLDC_HALL_SetThreshold_Low(void)
 {
 		//设定检测窗口为1200Hz，也就是0.833ms，当0.833ms内没重置HALL的计数器，则认为产生了一次换相错误事件
 		//但需要注意的是：空载情况与带桨（带负载情况下的阈值不同，用于空载和用于负载的值不可通用）
-		HALL->TH = (uint32_t)motorFlashData.motorPar.motorRun_BlockThreshold * 750;
+		HALL->TH = (uint32_t)motorFlashData.motorPar.motorRun_BlockThreshold * 3000;
 }
 /*在这里设定打开HALL计数器溢出中断的函数*/
 STI void BLDC_HALL_OverFlowInt_TurnOn(void)
@@ -314,20 +342,21 @@ STI void BLDC_SetADCTriggerPoint(int16_t triggerPoint)
 		MCPWM0->PWM_TMR3 = (uint16_t)(triggerPoint / 2 - 600);
 }
 
-/*在这里设定获取母线电压的函数*/
-STI uint32_t BLDC_GetBusVoltage(void)
+/*在这里设定获取母线电压的函数，单位：100mV，0.1V*/
+STI int32_t BLDC_GetBusVoltage(void)
 {
-    return 1500u;
+    return ADC->DAT2 * 99 / 128;
 }
-/*在这里设定获取母线电流的函数*/
-STI uint32_t BLDC_GetBusCurrent(void)
+/*在这里设定获取母线电流的函数，单位：100mA，0.1A*/
+STI int32_t BLDC_GetBusCurrent(void)
 {
-		return ADC->DAT0;
+		return ADC->DAT0 * 225 / 256;
 }
-/*在这里设定获取传感器温度的函数*/
-STI uint32_t BLDC_GetDriverTemperature(void)
+/*在这里设定获取传感器温度的函数，单位：0.1度*/
+STI int32_t BLDC_GetDriverTemperature(void)
 {
-		return ADC->DAT1;
+    int16_t t_Temperture = (m_TempertureCof.nOffsetB - ((int32_t)m_TempertureCof.nCofA * ADC->DAT1) *131 / 131072);
+		return t_Temperture;
 }
 
 /*====================一些预定义的系统变量类型，请勿做修改===================*/
@@ -351,8 +380,8 @@ typedef enum{
 }BLDC_RunStatus;
 
 typedef struct{
-		int16_t adcDriverTemperatureValue,adcBusCurrent,adcBusVoltageValue;
-		int16_t adcBusCurrentOffset;
+		int32_t adcDriverTemperatureValue,adcBusCurrent,adcBusVoltageValue;
+		int32_t adcBusCurrentOffset;
 }BLDC_ADCSensorHandler;
 
 typedef enum{
@@ -423,6 +452,11 @@ typedef struct{
 		uint8_t index;
 }BLDC_MotorAudioHandler;
 
+extern bool BLDC_CheckFlashData_NoError(void);
+extern void BLDC_Beep_Audio_0(void);
+extern void BLDC_Beep_Audio_1(void);
+extern void BLDC_Beep_Audio_2(void);
+extern void BLDC_Beep_Audio_x(uint8_t which);
 extern BLDC_MotorAudioHandler bldcAudioHandler;
 extern BLDC_SysHandler bldcSysHandler;
 

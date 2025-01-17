@@ -42,6 +42,7 @@
  *******************************************************************************/
 int main(void)
 {
+	
 	Hardware_init(); /* 硬件初始化 */
 	
 	strPWM_DutyCycleDef  strPWM_DutyCycle;
@@ -55,15 +56,14 @@ int main(void)
 	strPWM_DutyCycle.th20 = -PWM_PERIOD;
 	strPWM_DutyCycle.th21 = -PWM_PERIOD;
 	MCPWM_Update(&strPWM_DutyCycle);
-	/*TIM0使能*/
-	TIM_TimerCmd(TIMER0,ENABLE);
+	
 	/*TIM1使能*/
 	TIM_TimerCmd(TIMER1,ENABLE);
 	/*使能三相的PWM输出*/
 	PWMOutputs(MCPWM0, ENABLE);
 	for (;;)
 	{
-//		IWDG_Feed();//看门狗喂狗
+//		IWDG_Feed();//看门狗喂狗;
 	}
 }
 

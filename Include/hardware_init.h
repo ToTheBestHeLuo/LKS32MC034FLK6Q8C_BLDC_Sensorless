@@ -38,9 +38,6 @@
   
 #define DEADTIMECOMPVOLTAGE            (u16)(DEADTIME_NS/(1000000000.0/PWM_FREQ)*MAX_MODULE_VALUE)   
 
-
-
-
 void Hardware_init(void);
 void UTimer_init(void);
 void GPIO_init(void);
