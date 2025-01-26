@@ -198,6 +198,13 @@ void GPIO_init(void)
     GPIO_Init(GPIO0, &GPIO_InitStruct);
 		GPIO_SetBits(GPIO0,GPIO_Pin_9);
 	
+		/*P1.6 TX，目前先做DEBUG口*/
+    GPIO_StructInit(&GPIO_InitStruct);
+		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_6;
+    GPIO_Init(GPIO1, &GPIO_InitStruct);
+		GPIO_SetBits(GPIO1,GPIO_Pin_6);
+	
 		/*P0.0 ADC通道10 上电默认为AIN*/
     GPIO_StructInit(&GPIO_InitStruct);
 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_ANA;
@@ -250,7 +257,7 @@ void DAC_init(void)
 		DAC_StructInit(&DAC_InitStructure);
 		DAC_InitStructure.DACOUT_EN = DISABLE ;//禁止DAC电压通过P0.0输出
 		DAC_Init(&DAC_InitStructure);        /* DAC初始化 */
-		DAC_OutputVoltage((1.9f + 10.f / 0.5f * 0.01f) * BIT12);  /* DAC输出，每0.01V对应0.5A过流保护阈值*/
+		DAC_OutputVoltage((1.9f + 35.f / 0.5f * 0.01f) * BIT12);  /* DAC输出，每0.01V对应0.5A过流保护阈值*/
 }
 /*******************************************************************************
  函数名称：    void UTimer_init(void)

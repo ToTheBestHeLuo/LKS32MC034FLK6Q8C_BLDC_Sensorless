@@ -30,15 +30,13 @@ bool sG_ProtocolProcess(uint16_t* dataOut)
 				if(!escReady){
 					if(checkCnt++ > 50){
 						checkCnt = 0;
-						/*零油门*/
-						bldcSysHandler.bldcSensorlessHandler.pwmCountTarget = -1200;
 						minThrottle = motorFlashData.motorPar.motorDuty_Min * 12 - 1200;
 						maxThrottle = motorFlashData.motorPar.motorDuty_Max * 12 - 1200;
 						escReady = true;
 					}
 				}else{
 					if(dataIn == 0 || dataIn > 2046){
-						if(checkCnt++ > 50){
+						if(checkCnt++ > 100){
 							checkCnt = 0;
 							escReady = false;
 							bldcSysHandler.bldcSensorlessHandler.pwmCountTarget = -1200;
@@ -47,7 +45,7 @@ bool sG_ProtocolProcess(uint16_t* dataOut)
 							bldcSysHandler.sysStatus = eBLDC_Sys_Reset;
 							return true;
 						}
-					}else{
+					}else if(bldcSysHandler.bldcSensorlessHandler.runMode == eBLDC_Run_Mode_COMP_INT){
 						/*油门数据将被正确执行*/
 						int16_t throttle = (int16_t)((int32_t)dataIn * 38437 / 32768 - 1200);
 						if(throttle < minThrottle){
@@ -55,7 +53,6 @@ bool sG_ProtocolProcess(uint16_t* dataOut)
 						}else if(throttle > maxThrottle){
 							throttle = maxThrottle;
 						}
-						checkCnt = 0;
 						bldcSysHandler.bldcSensorlessHandler.pwmCountTarget = throttle;
 					}
 				}

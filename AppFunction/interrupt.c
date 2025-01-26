@@ -186,6 +186,7 @@ void HALL_IRQHandler(void)
 		}else if(runMode == eBLDC_Run_Mode_COMP_INT){
 			bldcSysHandler.sysErrorCode = eBLDC_Sys_Error_Commutation;
 		}
+		
 		BLDC_PWM_AllSides_TurnOff();
 		/*下列函数调用目的是为了重启电机*/
 		BLDC_HALL_OverFlowInt_TurnOff();
@@ -239,9 +240,9 @@ void SW_IRQHandler(void)
  *******************************************************************************/
 void CMP_IRQHandler(void)
 {	
-		GPIO_ResetBits(GPIO1,GPIO_Pin_3);
+		GPIO_ResetBits(GPIO1,GPIO_Pin_6);
 		BLDC_ZeroCrossCompTask();
-		GPIO_SetBits(GPIO1,GPIO_Pin_3);
+		GPIO_SetBits(GPIO1,GPIO_Pin_6);
 }
 
 /*******************************************************************************

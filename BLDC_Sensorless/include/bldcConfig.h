@@ -9,8 +9,8 @@
 #include "hardware_init.h"
 
 /*在这里设定母线欠电压和过电压保护时的值*/
-#define BLDC_Bus_UnderVoltage_Protect (140)
-#define BLDC_Bus_OverVoltage_Protect (180)
+#define BLDC_Bus_UnderVoltage_Protect (100)
+#define BLDC_Bus_OverVoltage_Protect (200)
 
 STI void System_Disable_sG_Int(void)
 {
@@ -107,12 +107,12 @@ STI int32_t BLDC_Div(int32_t dividend,int32_t divisor)
 /*在这里设定指示温度过高的函数*/
 STI bool BLDC_TEMP_Temperature_TooHigh(int32_t tmp)
 {
-		return (tmp > 900) ? true : false;
+		return (tmp > 600) ? true : false;
 }
 /*在这里设定指示温度过低的函数*/
 STI bool BLDC_TEMP_Temperature_TooLow(int32_t tmp)
 {
-		return (tmp < -100) ? true : false;
+		return (tmp < 50) ? true : false;
 }
 
 /*====================与GPIO相关的函数设定=======================*/
@@ -232,108 +232,6 @@ STI void BLDC_COMP_TurnOn(void)
 		CMP->CFG |= (BIT0);
 }
 
-/*====================与PWM相关的函数设定=======================*/
-
-/*在这里设定打开PWM中断的函数*/
-STI void BLDC_PWM_Int_TurnOn(void)
-{
-		MCPWM0->PWM_IE0 |= BIT0;
-}
-/*在这里设定关闭PWM中断的函数*/
-STI void BLDC_PWM_Int_TurnOff(void)
-{
-		MCPWM0->PWM_IE0 &= ~BIT0;
-}
-
-#define MCPWM_UPDATE_MASK (0xFFFFFFFF & ~(BIT15 | BIT14))
-
-/*在这里设定关闭PWM通道的函数，调整所有相的桥臂占空比为0%，需要关断PWM的通道的总开关*/
-STI void BLDC_PWM_TurnOff(void)
-{
-    MCPWM0->PWM_PRT = 0x0000DEAD;
-		MCPWM0->PWM_FAIL012 &= ~BIT6;
-		MCPWM0->PWM_TH00 = MCPWM0->PWM_TH01 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_TH10 = MCPWM0->PWM_TH11 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_TH20 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_UPDATE = MCPWM_UPDATE_MASK;
-		MCPWM0->PWM_FAIL012 &= ~BIT6;
-    MCPWM0->PWM_PRT = 0xFFFFFFFF;
-}
-/*在这里设定PWM三相的所有桥臂占空比为0%，需要打开PWM通道的总开关*/
-STI void BLDC_PWM_TurnOn(void)
-{
-    MCPWM0->PWM_PRT = 0x0000DEAD;
-		MCPWM0->PWM_TH00 = MCPWM0->PWM_TH01 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_TH10 = MCPWM0->PWM_TH11 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_TH20 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_UPDATE = MCPWM_UPDATE_MASK;
-		MCPWM0->PWM_FAIL012 |= BIT6;
-    MCPWM0->PWM_PRT = 0xFFFFFFFF;
-}
-/*在这里设定PWM三相的所有下桥臂（占空比为100%）同时关断所有上桥臂（占空比为0%）的函数*/
-STI void BLDC_PWM_LowSides_TurnOn(void)
-{
-		MCPWM0->PWM_TH00 = MCPWM0->PWM_TH10 = MCPWM0->PWM_TH20 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_TH01 = MCPWM0->PWM_TH11 = MCPWM0->PWM_TH21 = (uint16_t)+PWM_PERIOD_COUNT;
-		MCPWM0->PWM_UPDATE = MCPWM_UPDATE_MASK;
-}
-/*在这里设定PWM三相的所有上桥臂与下桥臂的占空比为0*/
-STI void BLDC_PWM_AllSides_TurnOff(void)
-{
-		MCPWM0->PWM_TH00 = MCPWM0->PWM_TH10 = MCPWM0->PWM_TH20 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_TH01 = MCPWM0->PWM_TH11 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
-
-		MCPWM0->PWM_UPDATE = MCPWM_UPDATE_MASK;
-}
-/*在这里设定UH占空比，UL=0%，VH=0%，VL=100%，WH=0%，WL=0%，同时设置比较器的正向输入端为W相浮空输入*/
-STI void BLDC_PWM_UH_VL(const uint16_t pwmCount)
-{
-		SYS_WR_PROTECT = 0x7A83;SYS_AFE_REG1 |= (BIT10 | BIT9 | BIT8);SYS_AFE_REG1 &= ~BIT9;SYS_WR_PROTECT = 0x0000;
-		MCPWM0->PWM_TH00 = pwmCount;MCPWM0->PWM_TH11 = (uint16_t)+PWM_PERIOD_COUNT;
-		MCPWM0->PWM_TH01 = MCPWM0->PWM_TH10 = MCPWM0->PWM_TH20 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_UPDATE = MCPWM_UPDATE_MASK;
-}
-/*在这里设定UH占空比，UL=0%，VH=0%，VL=0%，WH=0%，WL=100%，同时设置比较器的正向输入端为V相浮空输入*/
-STI void BLDC_PWM_UH_WL(const uint16_t pwmCount)
-{
-		SYS_WR_PROTECT = 0x7A83;SYS_AFE_REG1 |= (BIT10 | BIT9 | BIT8);SYS_AFE_REG1 &= ~BIT10;SYS_WR_PROTECT = 0x0000;
-		MCPWM0->PWM_TH00 = pwmCount;MCPWM0->PWM_TH21 = (uint16_t)+PWM_PERIOD_COUNT;
-		MCPWM0->PWM_TH01 = MCPWM0->PWM_TH10 = MCPWM0->PWM_TH11 = MCPWM0->PWM_TH20 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_UPDATE = MCPWM_UPDATE_MASK;	
-}
-/*在这里设定VH占空比，VL=0%，UH=0%，UL=100%，WH=0%，WL=0%，同时设置比较器的正向输入端为W相浮空输入*/
-STI void BLDC_PWM_VH_UL(const uint16_t pwmCount)
-{
-		SYS_WR_PROTECT = 0x7A83;SYS_AFE_REG1 |= (BIT10 | BIT9 | BIT8);SYS_AFE_REG1 &= ~BIT9;SYS_WR_PROTECT = 0x0000;
-		MCPWM0->PWM_TH10 = pwmCount;MCPWM0->PWM_TH01 = (uint16_t)+PWM_PERIOD_COUNT;
-		MCPWM0->PWM_TH11 = MCPWM0->PWM_TH00 = MCPWM0->PWM_TH20 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_UPDATE = MCPWM_UPDATE_MASK;	
-}
-/*在这里设定VH占空比，VL=0%，UH=0%，UL=0%，WH=0%，WL=100%，同时设置比较器的正向输入端为U相浮空输入*/
-STI void BLDC_PWM_VH_WL(const uint16_t pwmCount)
-{
-		SYS_WR_PROTECT = 0x7A83;SYS_AFE_REG1 |= (BIT10 | BIT9 | BIT8);SYS_AFE_REG1 &= ~(BIT9 | BIT8);SYS_WR_PROTECT = 0x0000;
-		MCPWM0->PWM_TH10 = pwmCount;MCPWM0->PWM_TH21 = (uint16_t)+PWM_PERIOD_COUNT;
-		MCPWM0->PWM_TH11 = MCPWM0->PWM_TH00 = MCPWM0->PWM_TH01 = MCPWM0->PWM_TH20 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_UPDATE = MCPWM_UPDATE_MASK;	
-}
-/*在这里设定WH占空比，WL=0%，UH=0%，UL=100%，VH=0%，VL=0%，同时设置比较器的正向输入端为V相浮空输入*/
-STI void BLDC_PWM_WH_UL(const uint16_t pwmCount)
-{
-		SYS_WR_PROTECT = 0x7A83;SYS_AFE_REG1 |= (BIT10 | BIT9 | BIT8);SYS_AFE_REG1 &= ~BIT10;SYS_WR_PROTECT = 0x0000;
-		MCPWM0->PWM_TH20 = pwmCount;MCPWM0->PWM_TH01 = (uint16_t)+PWM_PERIOD_COUNT;
-		MCPWM0->PWM_TH00 = MCPWM0->PWM_TH10 = MCPWM0->PWM_TH11 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_UPDATE = MCPWM_UPDATE_MASK;	
-}
-/*在这里设定WH占空比，WL=0%，UH=0%，UL=0%，VH=0%，VL=100%，同时设置比较器的正向输入端为U相浮空输入*/
-STI void BLDC_PWM_WH_VL(const uint16_t pwmCount)
-{
-		SYS_WR_PROTECT = 0x7A83;SYS_AFE_REG1 |= (BIT10 | BIT9 | BIT8);SYS_AFE_REG1 &= ~(BIT9 | BIT8);SYS_WR_PROTECT = 0x0000;
-		MCPWM0->PWM_TH20 = pwmCount;MCPWM0->PWM_TH11 = (uint16_t)+PWM_PERIOD_COUNT;
-		MCPWM0->PWM_TH00 = MCPWM0->PWM_TH01 = MCPWM0->PWM_TH10 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
-		MCPWM0->PWM_UPDATE = MCPWM_UPDATE_MASK;	
-}
-
 /*====================与ADC采样相关的函数设定===================*/
 
 /*在这里设定触发ADC采样的时刻的函数*/
@@ -376,7 +274,8 @@ typedef enum{
 		eBLDC_Run_Alignment,
 		eBLDC_Run_SpeedUp,
 		eBLDC_Run_OpenLoop,
-		eBLDC_Run_ReadyForCloseLoop
+		eBLDC_Run_ReadyForCloseLoop,
+		eBLDC_Run_CloseLoop
 }BLDC_RunStatus;
 
 typedef struct{
@@ -416,9 +315,10 @@ typedef struct{
 		BLDC_Sys_Error_Code sysErrorCode;
 		uint32_t lowSpeedCounter;
 		uint32_t highSpeedCounter;
+		uint32_t switchPhaseMask;
 		BLDC_ADCSensorHandler adcSensorHandler;
 		BLDC_SensorlessHandler bldcSensorlessHandler;
-		uint8_t counter;
+		uint16_t counter;
 }BLDC_SysHandler;
 
 typedef enum{
@@ -459,6 +359,116 @@ extern void BLDC_Beep_Audio_2(void);
 extern void BLDC_Beep_Audio_x(uint8_t which);
 extern BLDC_MotorAudioHandler bldcAudioHandler;
 extern BLDC_SysHandler bldcSysHandler;
+
+/*====================与PWM相关的函数设定=======================*/
+
+/*在这里设定打开PWM中断的函数*/
+STI void BLDC_PWM_Int_TurnOn(void)
+{
+		MCPWM0->PWM_IE0 |= BIT0;
+}
+/*在这里设定关闭PWM中断的函数*/
+STI void BLDC_PWM_Int_TurnOff(void)
+{
+		MCPWM0->PWM_IE0 &= ~BIT0;
+}
+
+#define MCPWM_UPDATE_MASK0 (0xFFFFFFFF & ~(BIT15 | BIT14))
+#define MCPWM_UPDATE_MASK1 (0xFFFFFFFF)
+
+/*在这里设定关闭PWM通道的函数，调整所有相的桥臂占空比为0%，需要关断PWM的通道的总开关*/
+STI void BLDC_PWM_TurnOff(void)
+{
+    MCPWM0->PWM_PRT = 0x0000DEAD;
+		MCPWM0->PWM_FAIL012 &= ~BIT6;
+		MCPWM0->PWM_TH00 = MCPWM0->PWM_TH01 = (uint16_t)-PWM_PERIOD_COUNT;
+		MCPWM0->PWM_TH10 = MCPWM0->PWM_TH11 = (uint16_t)-PWM_PERIOD_COUNT;
+		MCPWM0->PWM_TH20 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
+		MCPWM0->PWM_UPDATE = bldcSysHandler.switchPhaseMask;
+		MCPWM0->PWM_FAIL012 &= ~BIT6;
+    MCPWM0->PWM_PRT = 0xFFFFFFFF;
+}
+/*在这里设定PWM三相的所有桥臂占空比为0%，需要打开PWM通道的总开关*/
+STI void BLDC_PWM_TurnOn(void)
+{
+    MCPWM0->PWM_PRT = 0x0000DEAD;
+		MCPWM0->PWM_TH00 = MCPWM0->PWM_TH01 = (uint16_t)-PWM_PERIOD_COUNT;
+		MCPWM0->PWM_TH10 = MCPWM0->PWM_TH11 = (uint16_t)-PWM_PERIOD_COUNT;
+		MCPWM0->PWM_TH20 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
+		MCPWM0->PWM_UPDATE = bldcSysHandler.switchPhaseMask;
+		MCPWM0->PWM_FAIL012 |= BIT6;
+    MCPWM0->PWM_PRT = 0xFFFFFFFF;
+}
+/*在这里设定PWM三相的所有下桥臂（占空比为100%）同时关断所有上桥臂（占空比为0%）的函数*/
+STI void BLDC_PWM_LowSides_TurnOn(void)
+{
+		MCPWM0->PWM_TH00 = MCPWM0->PWM_TH10 = MCPWM0->PWM_TH20 = (uint16_t)-PWM_PERIOD_COUNT;
+		MCPWM0->PWM_TH01 = MCPWM0->PWM_TH11 = MCPWM0->PWM_TH21 = (uint16_t)+PWM_PERIOD_COUNT;
+		MCPWM0->PWM_UPDATE = bldcSysHandler.switchPhaseMask;
+}
+/*在这里设定PWM三相的所有上桥臂与下桥臂的占空比为0*/
+STI void BLDC_PWM_AllSides_TurnOff(void)
+{
+		MCPWM0->PWM_TH00 = MCPWM0->PWM_TH10 = MCPWM0->PWM_TH20 = (uint16_t)-PWM_PERIOD_COUNT;
+		MCPWM0->PWM_TH01 = MCPWM0->PWM_TH11 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
+
+		MCPWM0->PWM_UPDATE = bldcSysHandler.switchPhaseMask;
+}
+/*在这里设定UH占空比，UL=0%，VH=0%，VL=100%，WH=0%，WL=0%，同时设置比较器的正向输入端为W相浮空输入*/
+STI void BLDC_PWM_UH_VL(const uint16_t pwmCount)
+{
+		SYS_WR_PROTECT = 0x7A83;SYS_AFE_REG1 |= (BIT10 | BIT9 | BIT8);SYS_AFE_REG1 &= ~BIT9;SYS_WR_PROTECT = 0x0000;
+		MCPWM0->PWM_TH00 = pwmCount;MCPWM0->PWM_TH11 = (uint16_t)+PWM_PERIOD_COUNT;
+		MCPWM0->PWM_TH01 = MCPWM0->PWM_TH10 = MCPWM0->PWM_TH20 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
+	
+	
+		MCPWM0->PWM_UPDATE = bldcSysHandler.switchPhaseMask;
+}
+/*在这里设定UH占空比，UL=0%，VH=0%，VL=0%，WH=0%，WL=100%，同时设置比较器的正向输入端为V相浮空输入*/
+STI void BLDC_PWM_UH_WL(const uint16_t pwmCount)
+{
+		SYS_WR_PROTECT = 0x7A83;SYS_AFE_REG1 |= (BIT10 | BIT9 | BIT8);SYS_AFE_REG1 &= ~BIT10;SYS_WR_PROTECT = 0x0000;
+		MCPWM0->PWM_TH00 = pwmCount;MCPWM0->PWM_TH21 = (uint16_t)+PWM_PERIOD_COUNT;
+		MCPWM0->PWM_TH01 = MCPWM0->PWM_TH10 = MCPWM0->PWM_TH11 = MCPWM0->PWM_TH20 = (uint16_t)-PWM_PERIOD_COUNT;
+	
+		MCPWM0->PWM_UPDATE = bldcSysHandler.switchPhaseMask;	
+}
+/*在这里设定VH占空比，VL=0%，UH=0%，UL=100%，WH=0%，WL=0%，同时设置比较器的正向输入端为W相浮空输入*/
+STI void BLDC_PWM_VH_UL(const uint16_t pwmCount)
+{
+		SYS_WR_PROTECT = 0x7A83;SYS_AFE_REG1 |= (BIT10 | BIT9 | BIT8);SYS_AFE_REG1 &= ~BIT9;SYS_WR_PROTECT = 0x0000;
+		MCPWM0->PWM_TH10 = pwmCount;MCPWM0->PWM_TH01 = (uint16_t)+PWM_PERIOD_COUNT;
+		MCPWM0->PWM_TH11 = MCPWM0->PWM_TH00 = MCPWM0->PWM_TH20 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
+	
+		MCPWM0->PWM_UPDATE = bldcSysHandler.switchPhaseMask;	
+}
+/*在这里设定VH占空比，VL=0%，UH=0%，UL=0%，WH=0%，WL=100%，同时设置比较器的正向输入端为U相浮空输入*/
+STI void BLDC_PWM_VH_WL(const uint16_t pwmCount)
+{
+		SYS_WR_PROTECT = 0x7A83;SYS_AFE_REG1 |= (BIT10 | BIT9 | BIT8);SYS_AFE_REG1 &= ~(BIT9 | BIT8);SYS_WR_PROTECT = 0x0000;
+		MCPWM0->PWM_TH10 = pwmCount;MCPWM0->PWM_TH21 = (uint16_t)+PWM_PERIOD_COUNT;
+		MCPWM0->PWM_TH11 = MCPWM0->PWM_TH00 = MCPWM0->PWM_TH01 = MCPWM0->PWM_TH20 = (uint16_t)-PWM_PERIOD_COUNT;
+	
+		MCPWM0->PWM_UPDATE = bldcSysHandler.switchPhaseMask;	
+}
+/*在这里设定WH占空比，WL=0%，UH=0%，UL=100%，VH=0%，VL=0%，同时设置比较器的正向输入端为V相浮空输入*/
+STI void BLDC_PWM_WH_UL(const uint16_t pwmCount)
+{
+		SYS_WR_PROTECT = 0x7A83;SYS_AFE_REG1 |= (BIT10 | BIT9 | BIT8);SYS_AFE_REG1 &= ~BIT10;SYS_WR_PROTECT = 0x0000;
+		MCPWM0->PWM_TH20 = pwmCount;MCPWM0->PWM_TH01 = (uint16_t)+PWM_PERIOD_COUNT;
+		MCPWM0->PWM_TH00 = MCPWM0->PWM_TH10 = MCPWM0->PWM_TH11 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
+	
+		MCPWM0->PWM_UPDATE = bldcSysHandler.switchPhaseMask;	
+}
+/*在这里设定WH占空比，WL=0%，UH=0%，UL=0%，VH=0%，VL=100%，同时设置比较器的正向输入端为U相浮空输入*/
+STI void BLDC_PWM_WH_VL(const uint16_t pwmCount)
+{
+		SYS_WR_PROTECT = 0x7A83;SYS_AFE_REG1 |= (BIT10 | BIT9 | BIT8);SYS_AFE_REG1 &= ~(BIT9 | BIT8);SYS_WR_PROTECT = 0x0000;
+		MCPWM0->PWM_TH20 = pwmCount;MCPWM0->PWM_TH11 = (uint16_t)+PWM_PERIOD_COUNT;
+		MCPWM0->PWM_TH00 = MCPWM0->PWM_TH01 = MCPWM0->PWM_TH10 = MCPWM0->PWM_TH21 = (uint16_t)-PWM_PERIOD_COUNT;
+	
+		MCPWM0->PWM_UPDATE = bldcSysHandler.switchPhaseMask;	
+}
 
 /*这里存放的是可供用户直接调用的函数*/
 
