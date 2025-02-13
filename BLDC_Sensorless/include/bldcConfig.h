@@ -92,6 +92,8 @@ extern sG_MotorFlashUnion motorFlashData;
 extern const sG_MotorFlashUnion slave_MotorData_Sector;
 
 #define PWM_PERIOD_COUNT (1200)
+#define PWM_GAIN (((PWM_PERIOD_COUNT) / 200))
+#define PWM_GAIN2 (1200 / (PWM_PERIOD_COUNT))
 
 /*====================与硬件除法相关的函数设定=======================*/
 
@@ -237,7 +239,7 @@ STI void BLDC_COMP_TurnOn(void)
 /*在这里设定触发ADC采样的时刻的函数*/
 STI void BLDC_SetADCTriggerPoint(int16_t triggerPoint)
 {
-		MCPWM0->PWM_TMR3 = (uint16_t)(triggerPoint / 2 - 600);
+		MCPWM0->PWM_TMR3 = (uint16_t)((triggerPoint * 2 - PWM_PERIOD_COUNT * 2) / 4);
 }
 
 /*在这里设定获取母线电压的函数，单位：100mV，0.1V*/
@@ -248,12 +250,12 @@ STI int32_t BLDC_GetBusVoltage(void)
 /*在这里设定获取母线电流的函数，单位：100mA，0.1A*/
 STI int32_t BLDC_GetBusCurrent(void)
 {
-		return ADC->DAT0 * 225 / 256;
+		return ADC->DAT0 * 225 / 256 / 4;
 }
 /*在这里设定获取传感器温度的函数，单位：0.1度*/
 STI int32_t BLDC_GetDriverTemperature(void)
 {
-    int16_t t_Temperture = (m_TempertureCof.nOffsetB - ((int32_t)m_TempertureCof.nCofA * ADC->DAT1) *131 / 131072);
+    int16_t t_Temperture = (m_TempertureCof.nOffsetB - ((int32_t)m_TempertureCof.nCofA * ADC->DAT1) * 131 / 131072);
 		return t_Temperture;
 }
 

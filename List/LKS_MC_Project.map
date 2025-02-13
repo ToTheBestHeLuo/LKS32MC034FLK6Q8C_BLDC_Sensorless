@@ -78,9 +78,7 @@ Section Cross References
     interrupt.o(i.ADC_IRQHandler) refers to lks32mc03x_adc.o(i.ADC_GetIRQFlag) for ADC_GetIRQFlag
     interrupt.o(i.ADC_IRQHandler) refers to lks32mc03x_adc.o(i.ADC_ClearIRQFlag) for ADC_ClearIRQFlag
     interrupt.o(i.ADC_IRQHandler) refers to bldcdriver.o(i.BLDC_LowSpeedTask) for BLDC_LowSpeedTask
-    interrupt.o(i.CMP_IRQHandler) refers to lks32mc03x_gpio.o(i.GPIO_ResetBits) for GPIO_ResetBits
     interrupt.o(i.CMP_IRQHandler) refers to bldcdriver.o(i.BLDC_ZeroCrossCompTask) for BLDC_ZeroCrossCompTask
-    interrupt.o(i.CMP_IRQHandler) refers to lks32mc03x_gpio.o(i.GPIO_SetBits) for GPIO_SetBits
     interrupt.o(i.DMA_IRQHandler) refers to sgslave.o(i.sG_ProtocolProcess) for sG_ProtocolProcess
     interrupt.o(i.DMA_IRQHandler) refers to sgslave.o(i.sG_TransmitWithDMA) for sG_TransmitWithDMA
     interrupt.o(i.DMA_IRQHandler) refers to sgslave.o(.data) for sG
@@ -181,6 +179,7 @@ Section Cross References
     bldcdriver.o(i.BLDC_PWM_WH_UL) refers to bldcdriver.o(.bss) for .bss
     bldcdriver.o(i.BLDC_PWM_WH_VL) refers to bldcdriver.o(.bss) for .bss
     bldcdriver.o(i.BLDC_Run_Mode_COMP_Polling) refers to aeabi_sdivfast.o(.text) for __aeabi_uidivmod
+    bldcdriver.o(i.BLDC_Run_Mode_COMP_Polling) refers to hardware_init.o(i.SoftDelay) for SoftDelay
     bldcdriver.o(i.BLDC_Run_Mode_COMP_Polling) refers to bldcdriver.o(.bss) for .bss
     bldcdriver.o(i.BLDC_Run_Mode_COMP_Polling) refers to bldcdriver.o(.constdata) for .constdata
     bldcdriver.o(i.BLDC_ZeroCrossCompTask) refers to aeabi_sdivfast.o(.text) for __aeabi_uidivmod
@@ -375,6 +374,7 @@ Removing Unused input sections from the image.
     Removing lks32mc03x_gpio.o(i.GPIO_ReadInputDataBit), (14 bytes).
     Removing lks32mc03x_gpio.o(i.GPIO_ReadOutputData), (4 bytes).
     Removing lks32mc03x_gpio.o(i.GPIO_ReadOutputDataBit), (14 bytes).
+    Removing lks32mc03x_gpio.o(i.GPIO_ResetBits), (4 bytes).
     Removing lks32mc03x_gpio.o(i.GPIO_Write), (4 bytes).
     Removing lks32mc03x_gpio.o(i.GPIO_WriteBit), (12 bytes).
     Removing lks32mc03x_gpio.o(.constdata), (128 bytes).
@@ -465,7 +465,7 @@ Removing Unused input sections from the image.
     Removing sgslave.o(i.sG_ReceiveWithDMA), (88 bytes).
     Removing lks32mc03x_nvr.o(i.Prog_Trim), (100 bytes).
 
-148 unused section(s) (total 4903 bytes) removed from the image.
+149 unused section(s) (total 4907 bytes) removed from the image.
 
 ==============================================================================
 
@@ -477,62 +477,62 @@ Image Symbol Table
 
     RESET                                    0x00000000   Section      192  startup_lks32mc03x.o(RESET)
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit3.o ABSOLUTE
-    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit1.o ABSOLUTE
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit2.o ABSOLUTE
+    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit1.o ABSOLUTE
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardshut.o ABSOLUTE
-    ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_zi.o ABSOLUTE
     ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_copy.o ABSOLUTE
+    ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_zi.o ABSOLUTE
+    ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit.o ABSOLUTE
+    ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry2.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry4.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit2.o ABSOLUTE
-    ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry2.o ABSOLUTE
-    ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit.o ABSOLUTE
+    ../clib/angel/rt.s                       0x00000000   Number         0  aeabi_ldiv0_sigfpe.o ABSOLUTE
+    ../clib/angel/rt.s                       0x00000000   Number         0  aeabi_ldiv0.o ABSOLUTE
     ../clib/angel/rt.s                       0x00000000   Number         0  rt_div0.o ABSOLUTE
     ../clib/angel/rt.s                       0x00000000   Number         0  aeabi_idiv0.o ABSOLUTE
     ../clib/angel/rt.s                       0x00000000   Number         0  aeabi_idiv0_sigfpe.o ABSOLUTE
-    ../clib/angel/rt.s                       0x00000000   Number         0  aeabi_ldiv0.o ABSOLUTE
-    ../clib/angel/rt.s                       0x00000000   Number         0  aeabi_ldiv0_sigfpe.o ABSOLUTE
     ../clib/angel/rt.s                       0x00000000   Number         0  rt_raise.o ABSOLUTE
     ../clib/angel/scatterp.s                 0x00000000   Number         0  __scatter.o ABSOLUTE
     ../clib/angel/startup.s                  0x00000000   Number         0  __main.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  libspace.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  tempstk.o ABSOLUTE
-    ../clib/angel/sys.s                      0x00000000   Number         0  indicate_semi.o ABSOLUTE
-    ../clib/angel/sys.s                      0x00000000   Number         0  use_no_semi.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  sys_stackheap_outer.o ABSOLUTE
-    ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_command.o ABSOLUTE
+    ../clib/angel/sys.s                      0x00000000   Number         0  use_no_semi.o ABSOLUTE
+    ../clib/angel/sys.s                      0x00000000   Number         0  indicate_semi.o ABSOLUTE
     ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_exit.o ABSOLUTE
     ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_wrch.o ABSOLUTE
+    ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_command.o ABSOLUTE
+    ../clib/armsys.c                         0x00000000   Number         0  _get_argv_nomalloc.o ABSOLUTE
     ../clib/armsys.c                         0x00000000   Number         0  no_argv.o ABSOLUTE
     ../clib/armsys.c                         0x00000000   Number         0  argv_veneer.o ABSOLUTE
-    ../clib/armsys.c                         0x00000000   Number         0  _get_argv_nomalloc.o ABSOLUTE
-    ../clib/division.c                       0x00000000   Number         0  llsdiv.o ABSOLUTE
     ../clib/division.c                       0x00000000   Number         0  lludiv.o ABSOLUTE
+    ../clib/division.c                       0x00000000   Number         0  llsdiv.o ABSOLUTE
     ../clib/division.s                       0x00000000   Number         0  aeabi_sdivfast_div0.o ABSOLUTE
     ../clib/division.s                       0x00000000   Number         0  aeabi_sdivfast.o ABSOLUTE
     ../clib/heapalloc.c                      0x00000000   Number         0  hrguard.o ABSOLUTE
     ../clib/heapaux.c                        0x00000000   Number         0  heapauxi.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libshutdown.o ABSOLUTE
+    ../clib/libinit.s                        0x00000000   Number         0  libinit.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libinit2.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libshutdown2.o ABSOLUTE
-    ../clib/libinit.s                        0x00000000   Number         0  libinit.o ABSOLUTE
     ../clib/memcpset.c                       0x00000000   Number         0  rt_memclr.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtred_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_abrt_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_general.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_formal.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_outer.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  __raise.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_exit.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_general.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_other.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_formal.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_segv_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_formal.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_abrt_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_outer.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_cppl_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_pvfn_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_rtred_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_outer.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_stak_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_formal.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_outer.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_inner.o ABSOLUTE
     ../clib/signal.s                         0x00000000   Number         0  defsig.o ABSOLUTE
     ../clib/stdlib.c                         0x00000000   Number         0  exit.o ABSOLUTE
     ../fplib/cfplib/fpinit.c                 0x00000000   Number         0  fpinit.o ABSOLUTE
@@ -663,76 +663,75 @@ Image Symbol Table
     i.BLDC_PWM_WH_VL                         0x00000bb0   Section        0  bldcdriver.o(i.BLDC_PWM_WH_VL)
     BLDC_PWM_WH_VL                           0x00000bb1   Thumb Code    66  bldcdriver.o(i.BLDC_PWM_WH_VL)
     i.BLDC_Run_Mode_COMP_Polling             0x00000c0c   Section        0  bldcdriver.o(i.BLDC_Run_Mode_COMP_Polling)
-    BLDC_Run_Mode_COMP_Polling               0x00000c0d   Thumb Code   806  bldcdriver.o(i.BLDC_Run_Mode_COMP_Polling)
-    i.BLDC_ZeroCrossCompTask                 0x00000f74   Section        0  bldcdriver.o(i.BLDC_ZeroCrossCompTask)
-    i.CMP_IRQHandler                         0x0000105c   Section        0  interrupt.o(i.CMP_IRQHandler)
-    i.CMP_Init                               0x0000107c   Section        0  lks32mc03x_cmp.o(i.CMP_Init)
-    i.CMP_StructInit                         0x000011a4   Section        0  lks32mc03x_cmp.o(i.CMP_StructInit)
-    i.DAC_Init                               0x000011f0   Section        0  lks32mc03x_dac.o(i.DAC_Init)
-    i.DAC_OutputVoltage                      0x00001298   Section        0  lks32mc03x_dac.o(i.DAC_OutputVoltage)
-    i.DAC_StructInit                         0x000012ec   Section        0  lks32mc03x_dac.o(i.DAC_StructInit)
-    i.DMA_ClearIRQFlag                       0x000012f8   Section        0  lks32mc03x_dma.o(i.DMA_ClearIRQFlag)
-    i.DMA_IRQHandler                         0x00001304   Section        0  interrupt.o(i.DMA_IRQHandler)
-    i.DMA_Init                               0x000013e0   Section        0  lks32mc03x_dma.o(i.DMA_Init)
-    i.DMA_StructInit                         0x00001460   Section        0  lks32mc03x_dma.o(i.DMA_StructInit)
-    i.DSP_Cmd                                0x0000146e   Section        0  lks32mc03x_dsp.o(i.DSP_Cmd)
-    i.EraseSector                            0x0000147c   Section        0  lks32mc03x_flash.o(i.EraseSector)
-    i.GPIO_IRQHandler                        0x0000151c   Section        0  interrupt.o(i.GPIO_IRQHandler)
-    i.GPIO_Init                              0x0000151e   Section        0  lks32mc03x_gpio.o(i.GPIO_Init)
-    i.GPIO_PinAFConfig                       0x000015b0   Section        0  lks32mc03x_gpio.o(i.GPIO_PinAFConfig)
-    i.GPIO_ResetBits                         0x000016ac   Section        0  lks32mc03x_gpio.o(i.GPIO_ResetBits)
-    i.GPIO_SetBits                           0x000016b0   Section        0  lks32mc03x_gpio.o(i.GPIO_SetBits)
-    i.GPIO_StructInit                        0x000016b4   Section        0  lks32mc03x_gpio.o(i.GPIO_StructInit)
-    i.GPIO_init                              0x000016c0   Section        0  hardware_init.o(i.GPIO_init)
-    i.HALL_IRQHandler                        0x000017b8   Section        0  interrupt.o(i.HALL_IRQHandler)
-    i.HALL_Init                              0x0000185c   Section        0  lks32mc03x_hall.o(i.HALL_Init)
-    i.HALL_StructInit                        0x000018ac   Section        0  lks32mc03x_hall.o(i.HALL_StructInit)
-    i.Hardware_init                          0x000018d0   Section        0  hardware_init.o(i.Hardware_init)
-    i.I2C_IRQHandler                         0x00001ab4   Section        0  interrupt.o(i.I2C_IRQHandler)
-    i.IWDG_DISABLE                           0x00001ab8   Section        0  lks32mc03x_iwdg.o(i.IWDG_DISABLE)
-    i.MCPWM0_IRQHandler                      0x00001ac8   Section        0  interrupt.o(i.MCPWM0_IRQHandler)
-    i.MCPWM1_IRQHandler                      0x00001af8   Section        0  interrupt.o(i.MCPWM1_IRQHandler)
-    i.MCPWM_Init                             0x00001afc   Section        0  lks32mc03x_mcpwm.o(i.MCPWM_Init)
-    i.MCPWM_StructInit                       0x00001dd4   Section        0  lks32mc03x_mcpwm.o(i.MCPWM_StructInit)
-    i.MCPWM_SwapFunction                     0x00001de0   Section        0  lks32mc03x_mcpwm.o(i.MCPWM_SwapFunction)
-    i.MCPWM_Update                           0x00001dfc   Section        0  lks32mc03x_mcpwm.o(i.MCPWM_Update)
-    i.MCPWM_init                             0x00001e24   Section        0  hardware_init.o(i.MCPWM_init)
-    i.OPA_Init                               0x00001efc   Section        0  lks32mc03x_opa.o(i.OPA_Init)
-    i.OPA_OUT                                0x00001f38   Section        0  lks32mc03x_opa.o(i.OPA_OUT)
-    i.OPA_StructInit                         0x00001f68   Section        0  lks32mc03x_opa.o(i.OPA_StructInit)
-    i.PWMOutputs                             0x00001f74   Section        0  lks32mc03x_mcpwm.o(i.PWMOutputs)
-    i.ProgramPage                            0x00001fa0   Section        0  lks32mc03x_flash.o(i.ProgramPage)
-    i.Read_Trim                              0x00002168   Section        0  lks32mc03x_nvr.o(i.Read_Trim)
-    i.SPI_IRQHandler                         0x000021c8   Section        0  interrupt.o(i.SPI_IRQHandler)
-    i.SW_IRQHandler                          0x000021ca   Section        0  interrupt.o(i.SW_IRQHandler)
-    i.SYS_AnalogModuleClockCmd               0x000021cc   Section        0  lks32mc03x_sys.o(i.SYS_AnalogModuleClockCmd)
-    i.SYS_ModuleClockCmd                     0x00002210   Section        0  lks32mc03x_sys.o(i.SYS_ModuleClockCmd)
-    i.SYS_VolSelModule                       0x00002234   Section        0  lks32mc03x_sys.o(i.SYS_VolSelModule)
-    i.SoftDelay                              0x0000227a   Section        0  hardware_init.o(i.SoftDelay)
-    i.SysTick_Handler                        0x00002292   Section        0  interrupt.o(i.SysTick_Handler)
-    i.SystemInit                             0x00002294   Section        0  hardware_init.o(i.SystemInit)
-    i.TIMER0_IRQHandler                      0x000022d0   Section        0  interrupt.o(i.TIMER0_IRQHandler)
-    i.TIMER1_IRQHandler                      0x000022d4   Section        0  interrupt.o(i.TIMER1_IRQHandler)
-    i.TIM_TimerCmd                           0x00002364   Section        0  lks32mc03x_timer.o(i.TIM_TimerCmd)
-    i.TIM_TimerInit                          0x0000237c   Section        0  lks32mc03x_timer.o(i.TIM_TimerInit)
-    i.TIM_TimerStrutInit                     0x00002434   Section        0  lks32mc03x_timer.o(i.TIM_TimerStrutInit)
-    i.TempSensor_Init                        0x00002468   Section        0  lks32mc03x_tmp.o(i.TempSensor_Init)
-    i.UART_IRQHandler                        0x000024a0   Section        0  interrupt.o(i.UART_IRQHandler)
-    i.WAKE_IRQHandler                        0x000024a2   Section        0  interrupt.o(i.WAKE_IRQHandler)
-    i.__NVIC_SetPriority                     0x000024a4   Section        0  hardware_init.o(i.__NVIC_SetPriority)
-    __NVIC_SetPriority                       0x000024a5   Thumb Code    60  hardware_init.o(i.__NVIC_SetPriority)
-    i.delay_init                             0x000024e8   Section        0  delay.o(i.delay_init)
-    i.delay_ms                               0x0000250c   Section        0  delay.o(i.delay_ms)
-    i.main                                   0x00002570   Section        0  main.o(i.main)
-    i.sG_ProtocolProcess                     0x000025ac   Section        0  sgslave.o(i.sG_ProtocolProcess)
-    i.sG_TransmitWithDMA                     0x000028d8   Section        0  sgslave.o(i.sG_TransmitWithDMA)
-    .constdata                               0x0000292c   Section      235  bldcdriver.o(.constdata)
-    audioTone                                0x0000292c   Data           7  bldcdriver.o(.constdata)
-    motorAudio_0                             0x00002933   Data          76  bldcdriver.o(.constdata)
-    motorAudio_1                             0x0000297f   Data          76  bldcdriver.o(.constdata)
-    motorAudio_2                             0x000029cb   Data          76  bldcdriver.o(.constdata)
-    .constdata                               0x00002a17   Section       12  sgslave.o(.constdata)
-    slaveUniqueID                            0x00002a17   Data          12  sgslave.o(.constdata)
+    BLDC_Run_Mode_COMP_Polling               0x00000c0d   Thumb Code   938  bldcdriver.o(i.BLDC_Run_Mode_COMP_Polling)
+    i.BLDC_ZeroCrossCompTask                 0x00000ff8   Section        0  bldcdriver.o(i.BLDC_ZeroCrossCompTask)
+    i.CMP_IRQHandler                         0x000010dc   Section        0  interrupt.o(i.CMP_IRQHandler)
+    i.CMP_Init                               0x000010e4   Section        0  lks32mc03x_cmp.o(i.CMP_Init)
+    i.CMP_StructInit                         0x0000120c   Section        0  lks32mc03x_cmp.o(i.CMP_StructInit)
+    i.DAC_Init                               0x00001258   Section        0  lks32mc03x_dac.o(i.DAC_Init)
+    i.DAC_OutputVoltage                      0x00001300   Section        0  lks32mc03x_dac.o(i.DAC_OutputVoltage)
+    i.DAC_StructInit                         0x00001354   Section        0  lks32mc03x_dac.o(i.DAC_StructInit)
+    i.DMA_ClearIRQFlag                       0x00001360   Section        0  lks32mc03x_dma.o(i.DMA_ClearIRQFlag)
+    i.DMA_IRQHandler                         0x0000136c   Section        0  interrupt.o(i.DMA_IRQHandler)
+    i.DMA_Init                               0x00001448   Section        0  lks32mc03x_dma.o(i.DMA_Init)
+    i.DMA_StructInit                         0x000014c8   Section        0  lks32mc03x_dma.o(i.DMA_StructInit)
+    i.DSP_Cmd                                0x000014d6   Section        0  lks32mc03x_dsp.o(i.DSP_Cmd)
+    i.EraseSector                            0x000014e4   Section        0  lks32mc03x_flash.o(i.EraseSector)
+    i.GPIO_IRQHandler                        0x00001584   Section        0  interrupt.o(i.GPIO_IRQHandler)
+    i.GPIO_Init                              0x00001586   Section        0  lks32mc03x_gpio.o(i.GPIO_Init)
+    i.GPIO_PinAFConfig                       0x00001618   Section        0  lks32mc03x_gpio.o(i.GPIO_PinAFConfig)
+    i.GPIO_SetBits                           0x00001714   Section        0  lks32mc03x_gpio.o(i.GPIO_SetBits)
+    i.GPIO_StructInit                        0x00001718   Section        0  lks32mc03x_gpio.o(i.GPIO_StructInit)
+    i.GPIO_init                              0x00001724   Section        0  hardware_init.o(i.GPIO_init)
+    i.HALL_IRQHandler                        0x00001820   Section        0  interrupt.o(i.HALL_IRQHandler)
+    i.HALL_Init                              0x000018c4   Section        0  lks32mc03x_hall.o(i.HALL_Init)
+    i.HALL_StructInit                        0x00001914   Section        0  lks32mc03x_hall.o(i.HALL_StructInit)
+    i.Hardware_init                          0x00001938   Section        0  hardware_init.o(i.Hardware_init)
+    i.I2C_IRQHandler                         0x00001b1c   Section        0  interrupt.o(i.I2C_IRQHandler)
+    i.IWDG_DISABLE                           0x00001b20   Section        0  lks32mc03x_iwdg.o(i.IWDG_DISABLE)
+    i.MCPWM0_IRQHandler                      0x00001b30   Section        0  interrupt.o(i.MCPWM0_IRQHandler)
+    i.MCPWM1_IRQHandler                      0x00001b60   Section        0  interrupt.o(i.MCPWM1_IRQHandler)
+    i.MCPWM_Init                             0x00001b64   Section        0  lks32mc03x_mcpwm.o(i.MCPWM_Init)
+    i.MCPWM_StructInit                       0x00001e3c   Section        0  lks32mc03x_mcpwm.o(i.MCPWM_StructInit)
+    i.MCPWM_SwapFunction                     0x00001e48   Section        0  lks32mc03x_mcpwm.o(i.MCPWM_SwapFunction)
+    i.MCPWM_Update                           0x00001e64   Section        0  lks32mc03x_mcpwm.o(i.MCPWM_Update)
+    i.MCPWM_init                             0x00001e8c   Section        0  hardware_init.o(i.MCPWM_init)
+    i.OPA_Init                               0x00001f64   Section        0  lks32mc03x_opa.o(i.OPA_Init)
+    i.OPA_OUT                                0x00001fa0   Section        0  lks32mc03x_opa.o(i.OPA_OUT)
+    i.OPA_StructInit                         0x00001fd0   Section        0  lks32mc03x_opa.o(i.OPA_StructInit)
+    i.PWMOutputs                             0x00001fdc   Section        0  lks32mc03x_mcpwm.o(i.PWMOutputs)
+    i.ProgramPage                            0x00002008   Section        0  lks32mc03x_flash.o(i.ProgramPage)
+    i.Read_Trim                              0x000021d0   Section        0  lks32mc03x_nvr.o(i.Read_Trim)
+    i.SPI_IRQHandler                         0x00002230   Section        0  interrupt.o(i.SPI_IRQHandler)
+    i.SW_IRQHandler                          0x00002232   Section        0  interrupt.o(i.SW_IRQHandler)
+    i.SYS_AnalogModuleClockCmd               0x00002234   Section        0  lks32mc03x_sys.o(i.SYS_AnalogModuleClockCmd)
+    i.SYS_ModuleClockCmd                     0x00002278   Section        0  lks32mc03x_sys.o(i.SYS_ModuleClockCmd)
+    i.SYS_VolSelModule                       0x0000229c   Section        0  lks32mc03x_sys.o(i.SYS_VolSelModule)
+    i.SoftDelay                              0x000022e2   Section        0  hardware_init.o(i.SoftDelay)
+    i.SysTick_Handler                        0x000022fa   Section        0  interrupt.o(i.SysTick_Handler)
+    i.SystemInit                             0x000022fc   Section        0  hardware_init.o(i.SystemInit)
+    i.TIMER0_IRQHandler                      0x00002338   Section        0  interrupt.o(i.TIMER0_IRQHandler)
+    i.TIMER1_IRQHandler                      0x0000233c   Section        0  interrupt.o(i.TIMER1_IRQHandler)
+    i.TIM_TimerCmd                           0x000023cc   Section        0  lks32mc03x_timer.o(i.TIM_TimerCmd)
+    i.TIM_TimerInit                          0x000023e4   Section        0  lks32mc03x_timer.o(i.TIM_TimerInit)
+    i.TIM_TimerStrutInit                     0x0000249c   Section        0  lks32mc03x_timer.o(i.TIM_TimerStrutInit)
+    i.TempSensor_Init                        0x000024d0   Section        0  lks32mc03x_tmp.o(i.TempSensor_Init)
+    i.UART_IRQHandler                        0x00002508   Section        0  interrupt.o(i.UART_IRQHandler)
+    i.WAKE_IRQHandler                        0x0000250a   Section        0  interrupt.o(i.WAKE_IRQHandler)
+    i.__NVIC_SetPriority                     0x0000250c   Section        0  hardware_init.o(i.__NVIC_SetPriority)
+    __NVIC_SetPriority                       0x0000250d   Thumb Code    60  hardware_init.o(i.__NVIC_SetPriority)
+    i.delay_init                             0x00002550   Section        0  delay.o(i.delay_init)
+    i.delay_ms                               0x00002574   Section        0  delay.o(i.delay_ms)
+    i.main                                   0x000025d8   Section        0  main.o(i.main)
+    i.sG_ProtocolProcess                     0x00002614   Section        0  sgslave.o(i.sG_ProtocolProcess)
+    i.sG_TransmitWithDMA                     0x00002948   Section        0  sgslave.o(i.sG_TransmitWithDMA)
+    .constdata                               0x0000299c   Section      235  bldcdriver.o(.constdata)
+    audioTone                                0x0000299c   Data           7  bldcdriver.o(.constdata)
+    motorAudio_0                             0x000029a3   Data          76  bldcdriver.o(.constdata)
+    motorAudio_1                             0x000029ef   Data          76  bldcdriver.o(.constdata)
+    motorAudio_2                             0x00002a3b   Data          76  bldcdriver.o(.constdata)
+    .constdata                               0x00002a87   Section       12  sgslave.o(.constdata)
+    slaveUniqueID                            0x00002a87   Data          12  sgslave.o(.constdata)
     .ARM.__AT_0x00007C00                     0x00007c00   Section      512  bldcdriver.o(.ARM.__AT_0x00007C00)
     .data                                    0x20000000   Section        8  delay.o(.data)
     fac_us                                   0x20000000   Data           4  delay.o(.data)
@@ -749,8 +748,6 @@ Image Symbol Table
     .data                                    0x20000054   Section       88  sgslave.o(.data)
     checkCnt                                 0x20000054   Data           1  sgslave.o(.data)
     escReady                                 0x20000055   Data           1  sgslave.o(.data)
-    minThrottle                              0x20000056   Data           2  sgslave.o(.data)
-    maxThrottle                              0x20000058   Data           2  sgslave.o(.data)
     .bss                                     0x200000ac   Section      624  bldcdriver.o(.bss)
     BLDC_SwitchTable                         0x200000f8   Data          24  bldcdriver.o(.bss)
     .bss                                     0x2000031c   Section       96  libspace.o(.bss)
@@ -885,73 +882,74 @@ Image Symbol Table
     BLDC_CheckFlashData_NoError              0x000005c5   Thumb Code   116  bldcdriver.o(i.BLDC_CheckFlashData_NoError)
     BLDC_HighSpeedTask                       0x0000063d   Thumb Code    26  bldcdriver.o(i.BLDC_HighSpeedTask)
     BLDC_LowSpeedTask                        0x00000661   Thumb Code   826  bldcdriver.o(i.BLDC_LowSpeedTask)
-    BLDC_ZeroCrossCompTask                   0x00000f75   Thumb Code   196  bldcdriver.o(i.BLDC_ZeroCrossCompTask)
-    CMP_IRQHandler                           0x0000105d   Thumb Code    26  interrupt.o(i.CMP_IRQHandler)
-    CMP_Init                                 0x0000107d   Thumb Code   280  lks32mc03x_cmp.o(i.CMP_Init)
-    CMP_StructInit                           0x000011a5   Thumb Code    76  lks32mc03x_cmp.o(i.CMP_StructInit)
-    DAC_Init                                 0x000011f1   Thumb Code   150  lks32mc03x_dac.o(i.DAC_Init)
-    DAC_OutputVoltage                        0x00001299   Thumb Code    78  lks32mc03x_dac.o(i.DAC_OutputVoltage)
-    DAC_StructInit                           0x000012ed   Thumb Code    10  lks32mc03x_dac.o(i.DAC_StructInit)
-    DMA_ClearIRQFlag                         0x000012f9   Thumb Code     6  lks32mc03x_dma.o(i.DMA_ClearIRQFlag)
-    DMA_IRQHandler                           0x00001305   Thumb Code   178  interrupt.o(i.DMA_IRQHandler)
-    DMA_Init                                 0x000013e1   Thumb Code   120  lks32mc03x_dma.o(i.DMA_Init)
-    DMA_StructInit                           0x00001461   Thumb Code    14  lks32mc03x_dma.o(i.DMA_StructInit)
-    DSP_Cmd                                  0x0000146f   Thumb Code    14  lks32mc03x_dsp.o(i.DSP_Cmd)
-    EraseSector                              0x0000147d   Thumb Code   112  lks32mc03x_flash.o(i.EraseSector)
-    GPIO_IRQHandler                          0x0000151d   Thumb Code     2  interrupt.o(i.GPIO_IRQHandler)
-    GPIO_Init                                0x0000151f   Thumb Code   144  lks32mc03x_gpio.o(i.GPIO_Init)
-    GPIO_PinAFConfig                         0x000015b1   Thumb Code   238  lks32mc03x_gpio.o(i.GPIO_PinAFConfig)
-    GPIO_ResetBits                           0x000016ad   Thumb Code     4  lks32mc03x_gpio.o(i.GPIO_ResetBits)
-    GPIO_SetBits                             0x000016b1   Thumb Code     4  lks32mc03x_gpio.o(i.GPIO_SetBits)
-    GPIO_StructInit                          0x000016b5   Thumb Code    12  lks32mc03x_gpio.o(i.GPIO_StructInit)
-    GPIO_init                                0x000016c1   Thumb Code   240  hardware_init.o(i.GPIO_init)
-    HALL_IRQHandler                          0x000017b9   Thumb Code   126  interrupt.o(i.HALL_IRQHandler)
-    HALL_Init                                0x0000185d   Thumb Code    76  lks32mc03x_hall.o(i.HALL_Init)
-    HALL_StructInit                          0x000018ad   Thumb Code    32  lks32mc03x_hall.o(i.HALL_StructInit)
-    Hardware_init                            0x000018d1   Thumb Code   440  hardware_init.o(i.Hardware_init)
-    I2C_IRQHandler                           0x00001ab5   Thumb Code     2  interrupt.o(i.I2C_IRQHandler)
-    IWDG_DISABLE                             0x00001ab9   Thumb Code    10  lks32mc03x_iwdg.o(i.IWDG_DISABLE)
-    MCPWM0_IRQHandler                        0x00001ac9   Thumb Code    38  interrupt.o(i.MCPWM0_IRQHandler)
-    MCPWM1_IRQHandler                        0x00001af9   Thumb Code     2  interrupt.o(i.MCPWM1_IRQHandler)
-    MCPWM_Init                               0x00001afd   Thumb Code   716  lks32mc03x_mcpwm.o(i.MCPWM_Init)
-    MCPWM_StructInit                         0x00001dd5   Thumb Code    10  lks32mc03x_mcpwm.o(i.MCPWM_StructInit)
-    MCPWM_SwapFunction                       0x00001de1   Thumb Code    16  lks32mc03x_mcpwm.o(i.MCPWM_SwapFunction)
-    MCPWM_Update                             0x00001dfd   Thumb Code    36  lks32mc03x_mcpwm.o(i.MCPWM_Update)
-    MCPWM_init                               0x00001e25   Thumb Code   202  hardware_init.o(i.MCPWM_init)
-    OPA_Init                                 0x00001efd   Thumb Code    46  lks32mc03x_opa.o(i.OPA_Init)
-    OPA_OUT                                  0x00001f39   Thumb Code    40  lks32mc03x_opa.o(i.OPA_OUT)
-    OPA_StructInit                           0x00001f69   Thumb Code    12  lks32mc03x_opa.o(i.OPA_StructInit)
-    PWMOutputs                               0x00001f75   Thumb Code    30  lks32mc03x_mcpwm.o(i.PWMOutputs)
-    ProgramPage                              0x00001fa1   Thumb Code   410  lks32mc03x_flash.o(i.ProgramPage)
-    Read_Trim                                0x00002169   Thumb Code    90  lks32mc03x_nvr.o(i.Read_Trim)
-    SPI_IRQHandler                           0x000021c9   Thumb Code     2  interrupt.o(i.SPI_IRQHandler)
-    SW_IRQHandler                            0x000021cb   Thumb Code     2  interrupt.o(i.SW_IRQHandler)
-    SYS_AnalogModuleClockCmd                 0x000021cd   Thumb Code    60  lks32mc03x_sys.o(i.SYS_AnalogModuleClockCmd)
-    SYS_ModuleClockCmd                       0x00002211   Thumb Code    26  lks32mc03x_sys.o(i.SYS_ModuleClockCmd)
-    SYS_VolSelModule                         0x00002235   Thumb Code    70  lks32mc03x_sys.o(i.SYS_VolSelModule)
-    SoftDelay                                0x0000227b   Thumb Code    24  hardware_init.o(i.SoftDelay)
-    SysTick_Handler                          0x00002293   Thumb Code     2  interrupt.o(i.SysTick_Handler)
-    SystemInit                               0x00002295   Thumb Code    46  hardware_init.o(i.SystemInit)
-    TIMER0_IRQHandler                        0x000022d1   Thumb Code     2  interrupt.o(i.TIMER0_IRQHandler)
-    TIMER1_IRQHandler                        0x000022d5   Thumb Code   122  interrupt.o(i.TIMER1_IRQHandler)
-    TIM_TimerCmd                             0x00002365   Thumb Code    22  lks32mc03x_timer.o(i.TIM_TimerCmd)
-    TIM_TimerInit                            0x0000237d   Thumb Code   176  lks32mc03x_timer.o(i.TIM_TimerInit)
-    TIM_TimerStrutInit                       0x00002435   Thumb Code    52  lks32mc03x_timer.o(i.TIM_TimerStrutInit)
-    TempSensor_Init                          0x00002469   Thumb Code    42  lks32mc03x_tmp.o(i.TempSensor_Init)
-    UART_IRQHandler                          0x000024a1   Thumb Code     2  interrupt.o(i.UART_IRQHandler)
-    WAKE_IRQHandler                          0x000024a3   Thumb Code     2  interrupt.o(i.WAKE_IRQHandler)
-    delay_init                               0x000024e9   Thumb Code    28  delay.o(i.delay_init)
-    delay_ms                                 0x0000250d   Thumb Code    92  delay.o(i.delay_ms)
-    main                                     0x00002571   Thumb Code    46  main.o(i.main)
-    sG_ProtocolProcess                       0x000025ad   Thumb Code   718  sgslave.o(i.sG_ProtocolProcess)
-    sG_TransmitWithDMA                       0x000028d9   Thumb Code    76  sgslave.o(i.sG_TransmitWithDMA)
-    Region$$Table$$Base                      0x00002a24   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x00002a44   Number         0  anon$$obj.o(Region$$Table)
+    BLDC_ZeroCrossCompTask                   0x00000ff9   Thumb Code   190  bldcdriver.o(i.BLDC_ZeroCrossCompTask)
+    CMP_IRQHandler                           0x000010dd   Thumb Code     8  interrupt.o(i.CMP_IRQHandler)
+    CMP_Init                                 0x000010e5   Thumb Code   280  lks32mc03x_cmp.o(i.CMP_Init)
+    CMP_StructInit                           0x0000120d   Thumb Code    76  lks32mc03x_cmp.o(i.CMP_StructInit)
+    DAC_Init                                 0x00001259   Thumb Code   150  lks32mc03x_dac.o(i.DAC_Init)
+    DAC_OutputVoltage                        0x00001301   Thumb Code    78  lks32mc03x_dac.o(i.DAC_OutputVoltage)
+    DAC_StructInit                           0x00001355   Thumb Code    10  lks32mc03x_dac.o(i.DAC_StructInit)
+    DMA_ClearIRQFlag                         0x00001361   Thumb Code     6  lks32mc03x_dma.o(i.DMA_ClearIRQFlag)
+    DMA_IRQHandler                           0x0000136d   Thumb Code   178  interrupt.o(i.DMA_IRQHandler)
+    DMA_Init                                 0x00001449   Thumb Code   120  lks32mc03x_dma.o(i.DMA_Init)
+    DMA_StructInit                           0x000014c9   Thumb Code    14  lks32mc03x_dma.o(i.DMA_StructInit)
+    DSP_Cmd                                  0x000014d7   Thumb Code    14  lks32mc03x_dsp.o(i.DSP_Cmd)
+    EraseSector                              0x000014e5   Thumb Code   112  lks32mc03x_flash.o(i.EraseSector)
+    GPIO_IRQHandler                          0x00001585   Thumb Code     2  interrupt.o(i.GPIO_IRQHandler)
+    GPIO_Init                                0x00001587   Thumb Code   144  lks32mc03x_gpio.o(i.GPIO_Init)
+    GPIO_PinAFConfig                         0x00001619   Thumb Code   238  lks32mc03x_gpio.o(i.GPIO_PinAFConfig)
+    GPIO_SetBits                             0x00001715   Thumb Code     4  lks32mc03x_gpio.o(i.GPIO_SetBits)
+    GPIO_StructInit                          0x00001719   Thumb Code    12  lks32mc03x_gpio.o(i.GPIO_StructInit)
+    GPIO_init                                0x00001725   Thumb Code   244  hardware_init.o(i.GPIO_init)
+    HALL_IRQHandler                          0x00001821   Thumb Code   126  interrupt.o(i.HALL_IRQHandler)
+    HALL_Init                                0x000018c5   Thumb Code    76  lks32mc03x_hall.o(i.HALL_Init)
+    HALL_StructInit                          0x00001915   Thumb Code    32  lks32mc03x_hall.o(i.HALL_StructInit)
+    Hardware_init                            0x00001939   Thumb Code   440  hardware_init.o(i.Hardware_init)
+    I2C_IRQHandler                           0x00001b1d   Thumb Code     2  interrupt.o(i.I2C_IRQHandler)
+    IWDG_DISABLE                             0x00001b21   Thumb Code    10  lks32mc03x_iwdg.o(i.IWDG_DISABLE)
+    MCPWM0_IRQHandler                        0x00001b31   Thumb Code    38  interrupt.o(i.MCPWM0_IRQHandler)
+    MCPWM1_IRQHandler                        0x00001b61   Thumb Code     2  interrupt.o(i.MCPWM1_IRQHandler)
+    MCPWM_Init                               0x00001b65   Thumb Code   716  lks32mc03x_mcpwm.o(i.MCPWM_Init)
+    MCPWM_StructInit                         0x00001e3d   Thumb Code    10  lks32mc03x_mcpwm.o(i.MCPWM_StructInit)
+    MCPWM_SwapFunction                       0x00001e49   Thumb Code    16  lks32mc03x_mcpwm.o(i.MCPWM_SwapFunction)
+    MCPWM_Update                             0x00001e65   Thumb Code    36  lks32mc03x_mcpwm.o(i.MCPWM_Update)
+    MCPWM_init                               0x00001e8d   Thumb Code   202  hardware_init.o(i.MCPWM_init)
+    OPA_Init                                 0x00001f65   Thumb Code    46  lks32mc03x_opa.o(i.OPA_Init)
+    OPA_OUT                                  0x00001fa1   Thumb Code    40  lks32mc03x_opa.o(i.OPA_OUT)
+    OPA_StructInit                           0x00001fd1   Thumb Code    12  lks32mc03x_opa.o(i.OPA_StructInit)
+    PWMOutputs                               0x00001fdd   Thumb Code    30  lks32mc03x_mcpwm.o(i.PWMOutputs)
+    ProgramPage                              0x00002009   Thumb Code   410  lks32mc03x_flash.o(i.ProgramPage)
+    Read_Trim                                0x000021d1   Thumb Code    90  lks32mc03x_nvr.o(i.Read_Trim)
+    SPI_IRQHandler                           0x00002231   Thumb Code     2  interrupt.o(i.SPI_IRQHandler)
+    SW_IRQHandler                            0x00002233   Thumb Code     2  interrupt.o(i.SW_IRQHandler)
+    SYS_AnalogModuleClockCmd                 0x00002235   Thumb Code    60  lks32mc03x_sys.o(i.SYS_AnalogModuleClockCmd)
+    SYS_ModuleClockCmd                       0x00002279   Thumb Code    26  lks32mc03x_sys.o(i.SYS_ModuleClockCmd)
+    SYS_VolSelModule                         0x0000229d   Thumb Code    70  lks32mc03x_sys.o(i.SYS_VolSelModule)
+    SoftDelay                                0x000022e3   Thumb Code    24  hardware_init.o(i.SoftDelay)
+    SysTick_Handler                          0x000022fb   Thumb Code     2  interrupt.o(i.SysTick_Handler)
+    SystemInit                               0x000022fd   Thumb Code    46  hardware_init.o(i.SystemInit)
+    TIMER0_IRQHandler                        0x00002339   Thumb Code     2  interrupt.o(i.TIMER0_IRQHandler)
+    TIMER1_IRQHandler                        0x0000233d   Thumb Code   122  interrupt.o(i.TIMER1_IRQHandler)
+    TIM_TimerCmd                             0x000023cd   Thumb Code    22  lks32mc03x_timer.o(i.TIM_TimerCmd)
+    TIM_TimerInit                            0x000023e5   Thumb Code   176  lks32mc03x_timer.o(i.TIM_TimerInit)
+    TIM_TimerStrutInit                       0x0000249d   Thumb Code    52  lks32mc03x_timer.o(i.TIM_TimerStrutInit)
+    TempSensor_Init                          0x000024d1   Thumb Code    42  lks32mc03x_tmp.o(i.TempSensor_Init)
+    UART_IRQHandler                          0x00002509   Thumb Code     2  interrupt.o(i.UART_IRQHandler)
+    WAKE_IRQHandler                          0x0000250b   Thumb Code     2  interrupt.o(i.WAKE_IRQHandler)
+    delay_init                               0x00002551   Thumb Code    28  delay.o(i.delay_init)
+    delay_ms                                 0x00002575   Thumb Code    92  delay.o(i.delay_ms)
+    main                                     0x000025d9   Thumb Code    46  main.o(i.main)
+    sG_ProtocolProcess                       0x00002615   Thumb Code   728  sgslave.o(i.sG_ProtocolProcess)
+    sG_TransmitWithDMA                       0x00002949   Thumb Code    76  sgslave.o(i.sG_TransmitWithDMA)
+    Region$$Table$$Base                      0x00002a94   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x00002ab4   Number         0  anon$$obj.o(Region$$Table)
     slave_MotorData_Sector                   0x00007c00   Data         512  bldcdriver.o(.ARM.__AT_0x00007C00)
     Stru_DAC_CHECK                           0x20000008   Data           6  lks32mc03x_dac.o(.data)
     erase_flag                               0x20000010   Data           4  lks32mc03x_flash.o(.data)
     progm_flag                               0x20000014   Data           4  lks32mc03x_flash.o(.data)
     m_TempertureCof                          0x20000018   Data           4  lks32mc03x_tmp.o(.data)
+    minThrottle                              0x20000056   Data           2  sgslave.o(.data)
+    maxThrottle                              0x20000058   Data           2  sgslave.o(.data)
     sG                                       0x2000005a   Data          82  sgslave.o(.data)
     bldcSysHandler                           0x200000ac   Data          76  bldcdriver.o(.bss)
     motorFlashData                           0x20000110   Data         512  bldcdriver.o(.bss)
@@ -973,174 +971,173 @@ Memory Map of the image
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x00000000   0x00000000   0x000000c0   Data   RO         1474    RESET               startup_lks32mc03x.o
-    0x000000c0   0x000000c0   0x00000008   Code   RO         1691  * !!!main             c_p.l(__main.o)
-    0x000000c8   0x000000c8   0x0000003c   Code   RO         1868    !!!scatter          c_p.l(__scatter.o)
-    0x00000104   0x00000104   0x0000001a   Code   RO         1870    !!handler_copy      c_p.l(__scatter_copy.o)
+    0x00000000   0x00000000   0x000000c0   Data   RO         1412    RESET               startup_lks32mc03x.o
+    0x000000c0   0x000000c0   0x00000008   Code   RO         1625  * !!!main             c_p.l(__main.o)
+    0x000000c8   0x000000c8   0x0000003c   Code   RO         1802    !!!scatter          c_p.l(__scatter.o)
+    0x00000104   0x00000104   0x0000001a   Code   RO         1804    !!handler_copy      c_p.l(__scatter_copy.o)
     0x0000011e   0x0000011e   0x00000002   PAD
-    0x00000120   0x00000120   0x0000001c   Code   RO         1872    !!handler_zi        c_p.l(__scatter_zi.o)
-    0x0000013c   0x0000013c   0x00000002   Code   RO         1735    .ARM.Collect$$libinit$$00000000  c_p.l(libinit.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1749    .ARM.Collect$$libinit$$00000002  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1751    .ARM.Collect$$libinit$$00000004  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1754    .ARM.Collect$$libinit$$0000000A  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1756    .ARM.Collect$$libinit$$0000000C  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1758    .ARM.Collect$$libinit$$0000000E  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1761    .ARM.Collect$$libinit$$00000011  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1763    .ARM.Collect$$libinit$$00000013  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1765    .ARM.Collect$$libinit$$00000015  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1767    .ARM.Collect$$libinit$$00000017  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1769    .ARM.Collect$$libinit$$00000019  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1771    .ARM.Collect$$libinit$$0000001B  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1773    .ARM.Collect$$libinit$$0000001D  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1775    .ARM.Collect$$libinit$$0000001F  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1777    .ARM.Collect$$libinit$$00000021  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1779    .ARM.Collect$$libinit$$00000023  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1781    .ARM.Collect$$libinit$$00000025  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1785    .ARM.Collect$$libinit$$0000002C  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1787    .ARM.Collect$$libinit$$0000002E  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1789    .ARM.Collect$$libinit$$00000030  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000000   Code   RO         1791    .ARM.Collect$$libinit$$00000032  c_p.l(libinit2.o)
-    0x0000013e   0x0000013e   0x00000002   Code   RO         1792    .ARM.Collect$$libinit$$00000033  c_p.l(libinit2.o)
-    0x00000140   0x00000140   0x00000002   Code   RO         1823    .ARM.Collect$$libshutdown$$00000000  c_p.l(libshutdown.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1849    .ARM.Collect$$libshutdown$$00000002  c_p.l(libshutdown2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1851    .ARM.Collect$$libshutdown$$00000004  c_p.l(libshutdown2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1853    .ARM.Collect$$libshutdown$$00000006  c_p.l(libshutdown2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1856    .ARM.Collect$$libshutdown$$00000009  c_p.l(libshutdown2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1859    .ARM.Collect$$libshutdown$$0000000C  c_p.l(libshutdown2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1861    .ARM.Collect$$libshutdown$$0000000E  c_p.l(libshutdown2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1864    .ARM.Collect$$libshutdown$$00000011  c_p.l(libshutdown2.o)
-    0x00000142   0x00000142   0x00000002   Code   RO         1865    .ARM.Collect$$libshutdown$$00000012  c_p.l(libshutdown2.o)
-    0x00000144   0x00000144   0x00000000   Code   RO         1693    .ARM.Collect$$rtentry$$00000000  c_p.l(__rtentry.o)
-    0x00000144   0x00000144   0x00000000   Code   RO         1701    .ARM.Collect$$rtentry$$00000002  c_p.l(__rtentry2.o)
-    0x00000144   0x00000144   0x00000006   Code   RO         1713    .ARM.Collect$$rtentry$$00000004  c_p.l(__rtentry4.o)
-    0x0000014a   0x0000014a   0x00000000   Code   RO         1703    .ARM.Collect$$rtentry$$00000009  c_p.l(__rtentry2.o)
-    0x0000014a   0x0000014a   0x00000004   Code   RO         1704    .ARM.Collect$$rtentry$$0000000A  c_p.l(__rtentry2.o)
-    0x0000014e   0x0000014e   0x00000000   Code   RO         1706    .ARM.Collect$$rtentry$$0000000C  c_p.l(__rtentry2.o)
-    0x0000014e   0x0000014e   0x00000008   Code   RO         1707    .ARM.Collect$$rtentry$$0000000D  c_p.l(__rtentry2.o)
-    0x00000156   0x00000156   0x00000002   Code   RO         1740    .ARM.Collect$$rtexit$$00000000  c_p.l(rtexit.o)
-    0x00000158   0x00000158   0x00000000   Code   RO         1796    .ARM.Collect$$rtexit$$00000002  c_p.l(rtexit2.o)
-    0x00000158   0x00000158   0x00000004   Code   RO         1797    .ARM.Collect$$rtexit$$00000003  c_p.l(rtexit2.o)
-    0x0000015c   0x0000015c   0x00000006   Code   RO         1798    .ARM.Collect$$rtexit$$00000004  c_p.l(rtexit2.o)
+    0x00000120   0x00000120   0x0000001c   Code   RO         1806    !!handler_zi        c_p.l(__scatter_zi.o)
+    0x0000013c   0x0000013c   0x00000002   Code   RO         1669    .ARM.Collect$$libinit$$00000000  c_p.l(libinit.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1683    .ARM.Collect$$libinit$$00000002  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1685    .ARM.Collect$$libinit$$00000004  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1688    .ARM.Collect$$libinit$$0000000A  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1690    .ARM.Collect$$libinit$$0000000C  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1692    .ARM.Collect$$libinit$$0000000E  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1695    .ARM.Collect$$libinit$$00000011  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1697    .ARM.Collect$$libinit$$00000013  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1699    .ARM.Collect$$libinit$$00000015  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1701    .ARM.Collect$$libinit$$00000017  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1703    .ARM.Collect$$libinit$$00000019  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1705    .ARM.Collect$$libinit$$0000001B  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1707    .ARM.Collect$$libinit$$0000001D  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1709    .ARM.Collect$$libinit$$0000001F  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1711    .ARM.Collect$$libinit$$00000021  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1713    .ARM.Collect$$libinit$$00000023  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1715    .ARM.Collect$$libinit$$00000025  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1719    .ARM.Collect$$libinit$$0000002C  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1721    .ARM.Collect$$libinit$$0000002E  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1723    .ARM.Collect$$libinit$$00000030  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000000   Code   RO         1725    .ARM.Collect$$libinit$$00000032  c_p.l(libinit2.o)
+    0x0000013e   0x0000013e   0x00000002   Code   RO         1726    .ARM.Collect$$libinit$$00000033  c_p.l(libinit2.o)
+    0x00000140   0x00000140   0x00000002   Code   RO         1757    .ARM.Collect$$libshutdown$$00000000  c_p.l(libshutdown.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1783    .ARM.Collect$$libshutdown$$00000002  c_p.l(libshutdown2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1785    .ARM.Collect$$libshutdown$$00000004  c_p.l(libshutdown2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1787    .ARM.Collect$$libshutdown$$00000006  c_p.l(libshutdown2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1790    .ARM.Collect$$libshutdown$$00000009  c_p.l(libshutdown2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1793    .ARM.Collect$$libshutdown$$0000000C  c_p.l(libshutdown2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1795    .ARM.Collect$$libshutdown$$0000000E  c_p.l(libshutdown2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1798    .ARM.Collect$$libshutdown$$00000011  c_p.l(libshutdown2.o)
+    0x00000142   0x00000142   0x00000002   Code   RO         1799    .ARM.Collect$$libshutdown$$00000012  c_p.l(libshutdown2.o)
+    0x00000144   0x00000144   0x00000000   Code   RO         1627    .ARM.Collect$$rtentry$$00000000  c_p.l(__rtentry.o)
+    0x00000144   0x00000144   0x00000000   Code   RO         1635    .ARM.Collect$$rtentry$$00000002  c_p.l(__rtentry2.o)
+    0x00000144   0x00000144   0x00000006   Code   RO         1647    .ARM.Collect$$rtentry$$00000004  c_p.l(__rtentry4.o)
+    0x0000014a   0x0000014a   0x00000000   Code   RO         1637    .ARM.Collect$$rtentry$$00000009  c_p.l(__rtentry2.o)
+    0x0000014a   0x0000014a   0x00000004   Code   RO         1638    .ARM.Collect$$rtentry$$0000000A  c_p.l(__rtentry2.o)
+    0x0000014e   0x0000014e   0x00000000   Code   RO         1640    .ARM.Collect$$rtentry$$0000000C  c_p.l(__rtentry2.o)
+    0x0000014e   0x0000014e   0x00000008   Code   RO         1641    .ARM.Collect$$rtentry$$0000000D  c_p.l(__rtentry2.o)
+    0x00000156   0x00000156   0x00000002   Code   RO         1674    .ARM.Collect$$rtexit$$00000000  c_p.l(rtexit.o)
+    0x00000158   0x00000158   0x00000000   Code   RO         1730    .ARM.Collect$$rtexit$$00000002  c_p.l(rtexit2.o)
+    0x00000158   0x00000158   0x00000004   Code   RO         1731    .ARM.Collect$$rtexit$$00000003  c_p.l(rtexit2.o)
+    0x0000015c   0x0000015c   0x00000006   Code   RO         1732    .ARM.Collect$$rtexit$$00000004  c_p.l(rtexit2.o)
     0x00000162   0x00000162   0x00000002   PAD
-    0x00000164   0x00000164   0x00000044   Code   RO         1475    .text               startup_lks32mc03x.o
-    0x000001a8   0x000001a8   0x00000040   Code   RO         1683    .text               c_p.l(rt_memclr.o)
-    0x000001e8   0x000001e8   0x000001e8   Code   RO         1685    .text               c_p.l(aeabi_sdivfast.o)
-    0x000003d0   0x000003d0   0x00000006   Code   RO         1689    .text               c_p.l(heapauxi.o)
-    0x000003d6   0x000003d6   0x0000003e   Code   RO         1721    .text               c_p.l(sys_stackheap_outer.o)
-    0x00000414   0x00000414   0x00000010   Code   RO         1724    .text               c_p.l(exit.o)
-    0x00000424   0x00000424   0x00000008   Code   RO         1736    .text               c_p.l(libspace.o)
-    0x0000042c   0x0000042c   0x0000000c   Code   RO         1793    .text               c_p.l(sys_exit.o)
-    0x00000438   0x00000438   0x00000002   Code   RO         1812    .text               c_p.l(use_no_semi.o)
-    0x0000043a   0x0000043a   0x00000000   Code   RO         1814    .text               c_p.l(indicate_semi.o)
-    0x0000043a   0x0000043a   0x00000004   Code   RO          461    i.ADC_ClearIRQFlag  lks32mc03x_adc.o
-    0x0000043e   0x0000043e   0x0000000e   Code   RO          463    i.ADC_GetIRQFlag    lks32mc03x_adc.o
-    0x0000044c   0x0000044c   0x00000024   Code   RO          308    i.ADC_IRQHandler    interrupt.o
-    0x00000470   0x00000470   0x000000d8   Code   RO          464    i.ADC_Init          lks32mc03x_adc.o
-    0x00000548   0x00000548   0x00000026   Code   RO          466    i.ADC_StructInit    lks32mc03x_adc.o
+    0x00000164   0x00000164   0x00000044   Code   RO         1413    .text               startup_lks32mc03x.o
+    0x000001a8   0x000001a8   0x00000040   Code   RO         1617    .text               c_p.l(rt_memclr.o)
+    0x000001e8   0x000001e8   0x000001e8   Code   RO         1619    .text               c_p.l(aeabi_sdivfast.o)
+    0x000003d0   0x000003d0   0x00000006   Code   RO         1623    .text               c_p.l(heapauxi.o)
+    0x000003d6   0x000003d6   0x0000003e   Code   RO         1655    .text               c_p.l(sys_stackheap_outer.o)
+    0x00000414   0x00000414   0x00000010   Code   RO         1658    .text               c_p.l(exit.o)
+    0x00000424   0x00000424   0x00000008   Code   RO         1670    .text               c_p.l(libspace.o)
+    0x0000042c   0x0000042c   0x0000000c   Code   RO         1727    .text               c_p.l(sys_exit.o)
+    0x00000438   0x00000438   0x00000002   Code   RO         1746    .text               c_p.l(use_no_semi.o)
+    0x0000043a   0x0000043a   0x00000000   Code   RO         1748    .text               c_p.l(indicate_semi.o)
+    0x0000043a   0x0000043a   0x00000004   Code   RO          399    i.ADC_ClearIRQFlag  lks32mc03x_adc.o
+    0x0000043e   0x0000043e   0x0000000e   Code   RO          401    i.ADC_GetIRQFlag    lks32mc03x_adc.o
+    0x0000044c   0x0000044c   0x00000024   Code   RO          246    i.ADC_IRQHandler    interrupt.o
+    0x00000470   0x00000470   0x000000d8   Code   RO          402    i.ADC_Init          lks32mc03x_adc.o
+    0x00000548   0x00000548   0x00000026   Code   RO          404    i.ADC_StructInit    lks32mc03x_adc.o
     0x0000056e   0x0000056e   0x00000002   PAD
-    0x00000570   0x00000570   0x00000054   Code   RO         1484    i.BLDC_Beep_Audio_x  bldcdriver.o
-    0x000005c4   0x000005c4   0x00000078   Code   RO         1485    i.BLDC_CheckFlashData_NoError  bldcdriver.o
-    0x0000063c   0x0000063c   0x00000024   Code   RO         1486    i.BLDC_HighSpeedTask  bldcdriver.o
-    0x00000660   0x00000660   0x00000394   Code   RO         1487    i.BLDC_LowSpeedTask  bldcdriver.o
-    0x000009f4   0x000009f4   0x00000058   Code   RO         1488    i.BLDC_PWM_UH_VL    bldcdriver.o
-    0x00000a4c   0x00000a4c   0x00000058   Code   RO         1489    i.BLDC_PWM_UH_WL    bldcdriver.o
-    0x00000aa4   0x00000aa4   0x00000058   Code   RO         1490    i.BLDC_PWM_VH_UL    bldcdriver.o
-    0x00000afc   0x00000afc   0x0000005c   Code   RO         1491    i.BLDC_PWM_VH_WL    bldcdriver.o
-    0x00000b58   0x00000b58   0x00000058   Code   RO         1492    i.BLDC_PWM_WH_UL    bldcdriver.o
-    0x00000bb0   0x00000bb0   0x0000005c   Code   RO         1493    i.BLDC_PWM_WH_VL    bldcdriver.o
-    0x00000c0c   0x00000c0c   0x00000368   Code   RO         1494    i.BLDC_Run_Mode_COMP_Polling  bldcdriver.o
-    0x00000f74   0x00000f74   0x000000e8   Code   RO         1495    i.BLDC_ZeroCrossCompTask  bldcdriver.o
-    0x0000105c   0x0000105c   0x00000020   Code   RO          309    i.CMP_IRQHandler    interrupt.o
-    0x0000107c   0x0000107c   0x00000128   Code   RO          521    i.CMP_Init          lks32mc03x_cmp.o
-    0x000011a4   0x000011a4   0x0000004c   Code   RO          522    i.CMP_StructInit    lks32mc03x_cmp.o
-    0x000011f0   0x000011f0   0x000000a8   Code   RO          566    i.DAC_Init          lks32mc03x_dac.o
-    0x00001298   0x00001298   0x00000054   Code   RO          569    i.DAC_OutputVoltage  lks32mc03x_dac.o
-    0x000012ec   0x000012ec   0x0000000a   Code   RO          570    i.DAC_StructInit    lks32mc03x_dac.o
-    0x000012f6   0x000012f6   0x00000002   PAD
-    0x000012f8   0x000012f8   0x0000000c   Code   RO          620    i.DMA_ClearIRQFlag  lks32mc03x_dma.o
-    0x00001304   0x00001304   0x000000dc   Code   RO          310    i.DMA_IRQHandler    interrupt.o
-    0x000013e0   0x000013e0   0x00000080   Code   RO          622    i.DMA_Init          lks32mc03x_dma.o
-    0x00001460   0x00001460   0x0000000e   Code   RO          623    i.DMA_StructInit    lks32mc03x_dma.o
-    0x0000146e   0x0000146e   0x0000000e   Code   RO          667    i.DSP_Cmd           lks32mc03x_dsp.o
-    0x0000147c   0x0000147c   0x000000a0   Code   RO          703    i.EraseSector       lks32mc03x_flash.o
-    0x0000151c   0x0000151c   0x00000002   Code   RO          311    i.GPIO_IRQHandler   interrupt.o
-    0x0000151e   0x0000151e   0x00000090   Code   RO          750    i.GPIO_Init         lks32mc03x_gpio.o
-    0x000015ae   0x000015ae   0x00000002   PAD
-    0x000015b0   0x000015b0   0x000000fc   Code   RO          751    i.GPIO_PinAFConfig  lks32mc03x_gpio.o
-    0x000016ac   0x000016ac   0x00000004   Code   RO          756    i.GPIO_ResetBits    lks32mc03x_gpio.o
-    0x000016b0   0x000016b0   0x00000004   Code   RO          757    i.GPIO_SetBits      lks32mc03x_gpio.o
-    0x000016b4   0x000016b4   0x0000000c   Code   RO          758    i.GPIO_StructInit   lks32mc03x_gpio.o
-    0x000016c0   0x000016c0   0x000000f8   Code   RO          127    i.GPIO_init         hardware_init.o
-    0x000017b8   0x000017b8   0x000000a4   Code   RO          312    i.HALL_IRQHandler   interrupt.o
-    0x0000185c   0x0000185c   0x00000050   Code   RO          860    i.HALL_Init         lks32mc03x_hall.o
-    0x000018ac   0x000018ac   0x00000024   Code   RO          861    i.HALL_StructInit   lks32mc03x_hall.o
-    0x000018d0   0x000018d0   0x000001e4   Code   RO          129    i.Hardware_init     hardware_init.o
-    0x00001ab4   0x00001ab4   0x00000002   Code   RO          313    i.I2C_IRQHandler    interrupt.o
-    0x00001ab6   0x00001ab6   0x00000002   PAD
-    0x00001ab8   0x00001ab8   0x00000010   Code   RO          999    i.IWDG_DISABLE      lks32mc03x_iwdg.o
-    0x00001ac8   0x00001ac8   0x00000030   Code   RO          314    i.MCPWM0_IRQHandler  interrupt.o
-    0x00001af8   0x00001af8   0x00000002   Code   RO          315    i.MCPWM1_IRQHandler  interrupt.o
-    0x00001afa   0x00001afa   0x00000002   PAD
-    0x00001afc   0x00001afc   0x000002d8   Code   RO         1047    i.MCPWM_Init        lks32mc03x_mcpwm.o
-    0x00001dd4   0x00001dd4   0x0000000a   Code   RO         1049    i.MCPWM_StructInit  lks32mc03x_mcpwm.o
-    0x00001dde   0x00001dde   0x00000002   PAD
-    0x00001de0   0x00001de0   0x0000001c   Code   RO         1050    i.MCPWM_SwapFunction  lks32mc03x_mcpwm.o
-    0x00001dfc   0x00001dfc   0x00000028   Code   RO         1051    i.MCPWM_Update      lks32mc03x_mcpwm.o
-    0x00001e24   0x00001e24   0x000000d8   Code   RO          132    i.MCPWM_init        hardware_init.o
-    0x00001efc   0x00001efc   0x0000003c   Code   RO         1111    i.OPA_Init          lks32mc03x_opa.o
-    0x00001f38   0x00001f38   0x00000030   Code   RO         1112    i.OPA_OUT           lks32mc03x_opa.o
-    0x00001f68   0x00001f68   0x0000000c   Code   RO         1113    i.OPA_StructInit    lks32mc03x_opa.o
-    0x00001f74   0x00001f74   0x0000002c   Code   RO         1052    i.PWMOutputs        lks32mc03x_mcpwm.o
-    0x00001fa0   0x00001fa0   0x000001c8   Code   RO          704    i.ProgramPage       lks32mc03x_flash.o
-    0x00002168   0x00002168   0x00000060   Code   RO         1636    i.Read_Trim         lks32mc03x_nvr.lib(lks32mc03x_nvr.o)
-    0x000021c8   0x000021c8   0x00000002   Code   RO          316    i.SPI_IRQHandler    interrupt.o
-    0x000021ca   0x000021ca   0x00000002   Code   RO          317    i.SW_IRQHandler     interrupt.o
-    0x000021cc   0x000021cc   0x00000044   Code   RO         1200    i.SYS_AnalogModuleClockCmd  lks32mc03x_sys.o
-    0x00002210   0x00002210   0x00000024   Code   RO         1206    i.SYS_ModuleClockCmd  lks32mc03x_sys.o
-    0x00002234   0x00002234   0x00000046   Code   RO         1210    i.SYS_VolSelModule  lks32mc03x_sys.o
-    0x0000227a   0x0000227a   0x00000018   Code   RO          136    i.SoftDelay         hardware_init.o
-    0x00002292   0x00002292   0x00000002   Code   RO          318    i.SysTick_Handler   interrupt.o
-    0x00002294   0x00002294   0x0000003c   Code   RO          137    i.SystemInit        hardware_init.o
-    0x000022d0   0x000022d0   0x00000002   Code   RO          319    i.TIMER0_IRQHandler  interrupt.o
-    0x000022d2   0x000022d2   0x00000002   PAD
-    0x000022d4   0x000022d4   0x00000090   Code   RO          320    i.TIMER1_IRQHandler  interrupt.o
-    0x00002364   0x00002364   0x00000016   Code   RO         1314    i.TIM_TimerCmd      lks32mc03x_timer.o
-    0x0000237a   0x0000237a   0x00000002   PAD
-    0x0000237c   0x0000237c   0x000000b8   Code   RO         1315    i.TIM_TimerInit     lks32mc03x_timer.o
-    0x00002434   0x00002434   0x00000034   Code   RO         1316    i.TIM_TimerStrutInit  lks32mc03x_timer.o
-    0x00002468   0x00002468   0x00000038   Code   RO         1378    i.TempSensor_Init   lks32mc03x_tmp.o
-    0x000024a0   0x000024a0   0x00000002   Code   RO          321    i.UART_IRQHandler   interrupt.o
-    0x000024a2   0x000024a2   0x00000002   Code   RO          322    i.WAKE_IRQHandler   interrupt.o
-    0x000024a4   0x000024a4   0x00000044   Code   RO          140    i.__NVIC_SetPriority  hardware_init.o
-    0x000024e8   0x000024e8   0x00000024   Code   RO          420    i.delay_init        delay.o
-    0x0000250c   0x0000250c   0x00000064   Code   RO          421    i.delay_ms          delay.o
-    0x00002570   0x00002570   0x0000003c   Code   RO            3    i.main              main.o
-    0x000025ac   0x000025ac   0x0000032c   Code   RO         1594    i.sG_ProtocolProcess  sgslave.o
-    0x000028d8   0x000028d8   0x00000054   Code   RO         1596    i.sG_TransmitWithDMA  sgslave.o
-    0x0000292c   0x0000292c   0x000000eb   Data   RO         1498    .constdata          bldcdriver.o
-    0x00002a17   0x00002a17   0x0000000c   Data   RO         1597    .constdata          sgslave.o
-    0x00002a23   0x00002a23   0x00000001   PAD
-    0x00002a24   0x00002a24   0x00000020   Data   RO         1866    Region$$Table       anon$$obj.o
-    0x00002a44   0x00002a44   0x000051bc   PAD
-    0x00007c00   0x00007c00   0x00000200   Data   RO         1496    .ARM.__AT_0x00007C00  bldcdriver.o
+    0x00000570   0x00000570   0x00000054   Code   RO         1422    i.BLDC_Beep_Audio_x  bldcdriver.o
+    0x000005c4   0x000005c4   0x00000078   Code   RO         1423    i.BLDC_CheckFlashData_NoError  bldcdriver.o
+    0x0000063c   0x0000063c   0x00000024   Code   RO         1424    i.BLDC_HighSpeedTask  bldcdriver.o
+    0x00000660   0x00000660   0x00000394   Code   RO         1425    i.BLDC_LowSpeedTask  bldcdriver.o
+    0x000009f4   0x000009f4   0x00000058   Code   RO         1426    i.BLDC_PWM_UH_VL    bldcdriver.o
+    0x00000a4c   0x00000a4c   0x00000058   Code   RO         1427    i.BLDC_PWM_UH_WL    bldcdriver.o
+    0x00000aa4   0x00000aa4   0x00000058   Code   RO         1428    i.BLDC_PWM_VH_UL    bldcdriver.o
+    0x00000afc   0x00000afc   0x0000005c   Code   RO         1429    i.BLDC_PWM_VH_WL    bldcdriver.o
+    0x00000b58   0x00000b58   0x00000058   Code   RO         1430    i.BLDC_PWM_WH_UL    bldcdriver.o
+    0x00000bb0   0x00000bb0   0x0000005c   Code   RO         1431    i.BLDC_PWM_WH_VL    bldcdriver.o
+    0x00000c0c   0x00000c0c   0x000003ec   Code   RO         1432    i.BLDC_Run_Mode_COMP_Polling  bldcdriver.o
+    0x00000ff8   0x00000ff8   0x000000e4   Code   RO         1433    i.BLDC_ZeroCrossCompTask  bldcdriver.o
+    0x000010dc   0x000010dc   0x00000008   Code   RO          247    i.CMP_IRQHandler    interrupt.o
+    0x000010e4   0x000010e4   0x00000128   Code   RO          459    i.CMP_Init          lks32mc03x_cmp.o
+    0x0000120c   0x0000120c   0x0000004c   Code   RO          460    i.CMP_StructInit    lks32mc03x_cmp.o
+    0x00001258   0x00001258   0x000000a8   Code   RO          504    i.DAC_Init          lks32mc03x_dac.o
+    0x00001300   0x00001300   0x00000054   Code   RO          507    i.DAC_OutputVoltage  lks32mc03x_dac.o
+    0x00001354   0x00001354   0x0000000a   Code   RO          508    i.DAC_StructInit    lks32mc03x_dac.o
+    0x0000135e   0x0000135e   0x00000002   PAD
+    0x00001360   0x00001360   0x0000000c   Code   RO          558    i.DMA_ClearIRQFlag  lks32mc03x_dma.o
+    0x0000136c   0x0000136c   0x000000dc   Code   RO          248    i.DMA_IRQHandler    interrupt.o
+    0x00001448   0x00001448   0x00000080   Code   RO          560    i.DMA_Init          lks32mc03x_dma.o
+    0x000014c8   0x000014c8   0x0000000e   Code   RO          561    i.DMA_StructInit    lks32mc03x_dma.o
+    0x000014d6   0x000014d6   0x0000000e   Code   RO          605    i.DSP_Cmd           lks32mc03x_dsp.o
+    0x000014e4   0x000014e4   0x000000a0   Code   RO          641    i.EraseSector       lks32mc03x_flash.o
+    0x00001584   0x00001584   0x00000002   Code   RO          249    i.GPIO_IRQHandler   interrupt.o
+    0x00001586   0x00001586   0x00000090   Code   RO          688    i.GPIO_Init         lks32mc03x_gpio.o
+    0x00001616   0x00001616   0x00000002   PAD
+    0x00001618   0x00001618   0x000000fc   Code   RO          689    i.GPIO_PinAFConfig  lks32mc03x_gpio.o
+    0x00001714   0x00001714   0x00000004   Code   RO          695    i.GPIO_SetBits      lks32mc03x_gpio.o
+    0x00001718   0x00001718   0x0000000c   Code   RO          696    i.GPIO_StructInit   lks32mc03x_gpio.o
+    0x00001724   0x00001724   0x000000fc   Code   RO          127    i.GPIO_init         hardware_init.o
+    0x00001820   0x00001820   0x000000a4   Code   RO          250    i.HALL_IRQHandler   interrupt.o
+    0x000018c4   0x000018c4   0x00000050   Code   RO          798    i.HALL_Init         lks32mc03x_hall.o
+    0x00001914   0x00001914   0x00000024   Code   RO          799    i.HALL_StructInit   lks32mc03x_hall.o
+    0x00001938   0x00001938   0x000001e4   Code   RO          129    i.Hardware_init     hardware_init.o
+    0x00001b1c   0x00001b1c   0x00000002   Code   RO          251    i.I2C_IRQHandler    interrupt.o
+    0x00001b1e   0x00001b1e   0x00000002   PAD
+    0x00001b20   0x00001b20   0x00000010   Code   RO          937    i.IWDG_DISABLE      lks32mc03x_iwdg.o
+    0x00001b30   0x00001b30   0x00000030   Code   RO          252    i.MCPWM0_IRQHandler  interrupt.o
+    0x00001b60   0x00001b60   0x00000002   Code   RO          253    i.MCPWM1_IRQHandler  interrupt.o
+    0x00001b62   0x00001b62   0x00000002   PAD
+    0x00001b64   0x00001b64   0x000002d8   Code   RO          985    i.MCPWM_Init        lks32mc03x_mcpwm.o
+    0x00001e3c   0x00001e3c   0x0000000a   Code   RO          987    i.MCPWM_StructInit  lks32mc03x_mcpwm.o
+    0x00001e46   0x00001e46   0x00000002   PAD
+    0x00001e48   0x00001e48   0x0000001c   Code   RO          988    i.MCPWM_SwapFunction  lks32mc03x_mcpwm.o
+    0x00001e64   0x00001e64   0x00000028   Code   RO          989    i.MCPWM_Update      lks32mc03x_mcpwm.o
+    0x00001e8c   0x00001e8c   0x000000d8   Code   RO          132    i.MCPWM_init        hardware_init.o
+    0x00001f64   0x00001f64   0x0000003c   Code   RO         1049    i.OPA_Init          lks32mc03x_opa.o
+    0x00001fa0   0x00001fa0   0x00000030   Code   RO         1050    i.OPA_OUT           lks32mc03x_opa.o
+    0x00001fd0   0x00001fd0   0x0000000c   Code   RO         1051    i.OPA_StructInit    lks32mc03x_opa.o
+    0x00001fdc   0x00001fdc   0x0000002c   Code   RO          990    i.PWMOutputs        lks32mc03x_mcpwm.o
+    0x00002008   0x00002008   0x000001c8   Code   RO          642    i.ProgramPage       lks32mc03x_flash.o
+    0x000021d0   0x000021d0   0x00000060   Code   RO         1570    i.Read_Trim         lks32mc03x_nvr.lib(lks32mc03x_nvr.o)
+    0x00002230   0x00002230   0x00000002   Code   RO          254    i.SPI_IRQHandler    interrupt.o
+    0x00002232   0x00002232   0x00000002   Code   RO          255    i.SW_IRQHandler     interrupt.o
+    0x00002234   0x00002234   0x00000044   Code   RO         1138    i.SYS_AnalogModuleClockCmd  lks32mc03x_sys.o
+    0x00002278   0x00002278   0x00000024   Code   RO         1144    i.SYS_ModuleClockCmd  lks32mc03x_sys.o
+    0x0000229c   0x0000229c   0x00000046   Code   RO         1148    i.SYS_VolSelModule  lks32mc03x_sys.o
+    0x000022e2   0x000022e2   0x00000018   Code   RO          136    i.SoftDelay         hardware_init.o
+    0x000022fa   0x000022fa   0x00000002   Code   RO          256    i.SysTick_Handler   interrupt.o
+    0x000022fc   0x000022fc   0x0000003c   Code   RO          137    i.SystemInit        hardware_init.o
+    0x00002338   0x00002338   0x00000002   Code   RO          257    i.TIMER0_IRQHandler  interrupt.o
+    0x0000233a   0x0000233a   0x00000002   PAD
+    0x0000233c   0x0000233c   0x00000090   Code   RO          258    i.TIMER1_IRQHandler  interrupt.o
+    0x000023cc   0x000023cc   0x00000016   Code   RO         1252    i.TIM_TimerCmd      lks32mc03x_timer.o
+    0x000023e2   0x000023e2   0x00000002   PAD
+    0x000023e4   0x000023e4   0x000000b8   Code   RO         1253    i.TIM_TimerInit     lks32mc03x_timer.o
+    0x0000249c   0x0000249c   0x00000034   Code   RO         1254    i.TIM_TimerStrutInit  lks32mc03x_timer.o
+    0x000024d0   0x000024d0   0x00000038   Code   RO         1316    i.TempSensor_Init   lks32mc03x_tmp.o
+    0x00002508   0x00002508   0x00000002   Code   RO          259    i.UART_IRQHandler   interrupt.o
+    0x0000250a   0x0000250a   0x00000002   Code   RO          260    i.WAKE_IRQHandler   interrupt.o
+    0x0000250c   0x0000250c   0x00000044   Code   RO          140    i.__NVIC_SetPriority  hardware_init.o
+    0x00002550   0x00002550   0x00000024   Code   RO          358    i.delay_init        delay.o
+    0x00002574   0x00002574   0x00000064   Code   RO          359    i.delay_ms          delay.o
+    0x000025d8   0x000025d8   0x0000003c   Code   RO            3    i.main              main.o
+    0x00002614   0x00002614   0x00000334   Code   RO         1528    i.sG_ProtocolProcess  sgslave.o
+    0x00002948   0x00002948   0x00000054   Code   RO         1530    i.sG_TransmitWithDMA  sgslave.o
+    0x0000299c   0x0000299c   0x000000eb   Data   RO         1436    .constdata          bldcdriver.o
+    0x00002a87   0x00002a87   0x0000000c   Data   RO         1531    .constdata          sgslave.o
+    0x00002a93   0x00002a93   0x00000001   PAD
+    0x00002a94   0x00002a94   0x00000020   Data   RO         1800    Region$$Table       anon$$obj.o
+    0x00002ab4   0x00002ab4   0x0000514c   PAD
+    0x00007c00   0x00007c00   0x00000200   Data   RO         1434    .ARM.__AT_0x00007C00  bldcdriver.o
 
 
     Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x00007e00, Size: 0x00000980, Max: 0x00001000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   0x00007e00   0x00000008   Data   RW          424    .data               delay.o
-    0x20000008   0x00007e08   0x00000006   Data   RW          571    .data               lks32mc03x_dac.o
+    0x20000000   0x00007e00   0x00000008   Data   RW          362    .data               delay.o
+    0x20000008   0x00007e08   0x00000006   Data   RW          509    .data               lks32mc03x_dac.o
     0x2000000e   0x00007e0e   0x00000002   PAD
-    0x20000010   0x00007e10   0x00000008   Data   RW          707    .data               lks32mc03x_flash.o
-    0x20000018   0x00007e18   0x00000004   Data   RW         1379    .data               lks32mc03x_tmp.o
-    0x2000001c   0x00007e1c   0x00000038   Data   RW         1499    .data               bldcdriver.o
-    0x20000054   0x00007e54   0x00000058   Data   RW         1598    .data               sgslave.o
-    0x200000ac        -       0x00000270   Zero   RW         1497    .bss                bldcdriver.o
-    0x2000031c        -       0x00000060   Zero   RW         1737    .bss                c_p.l(libspace.o)
+    0x20000010   0x00007e10   0x00000008   Data   RW          645    .data               lks32mc03x_flash.o
+    0x20000018   0x00007e18   0x00000004   Data   RW         1317    .data               lks32mc03x_tmp.o
+    0x2000001c   0x00007e1c   0x00000038   Data   RW         1437    .data               bldcdriver.o
+    0x20000054   0x00007e54   0x00000058   Data   RW         1532    .data               sgslave.o
+    0x200000ac        -       0x00000270   Zero   RW         1435    .bss                bldcdriver.o
+    0x2000031c        -       0x00000060   Zero   RW         1671    .bss                c_p.l(libspace.o)
     0x2000037c   0x00007eac   0x00000004   PAD
-    0x20000380        -       0x00000200   Zero   RW         1473    HEAP                startup_lks32mc03x.o
-    0x20000580        -       0x00000400   Zero   RW         1472    STACK               startup_lks32mc03x.o
+    0x20000380        -       0x00000200   Zero   RW         1411    HEAP                startup_lks32mc03x.o
+    0x20000580        -       0x00000400   Zero   RW         1410    STACK               startup_lks32mc03x.o
 
 
 ==============================================================================
@@ -1150,17 +1147,17 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-      2796        386        747         56        624      24116   bldcdriver.o
+      2924        388        747         56        624      24524   bldcdriver.o
        136         16          0          8          0       1692   delay.o
-      1100         88          0          0          0      32539   hardware_init.o
-       662        124          0          0          0      15048   interrupt.o
+      1104         88          0          0          0      12759   hardware_init.o
+       638        118          0          0          0      15188   interrupt.o
        272         18          0          0          0       6324   lks32mc03x_adc.o
        372         16          0          0          0       2828   lks32mc03x_cmp.o
        262         24          0          6          0       3049   lks32mc03x_dac.o
        154         14          0          0          0       3243   lks32mc03x_dma.o
         14          0          0          0          0        490   lks32mc03x_dsp.o
        616         94          0          8          0       2641   lks32mc03x_flash.o
-       416         30          0          0          0       6205   lks32mc03x_gpio.o
+       412         30          0          0          0       5688   lks32mc03x_gpio.o
        116          8          0          0          0       2270   lks32mc03x_hall.o
         16          6          0          0          0        439   lks32mc03x_iwdg.o
        850         42          0          0          0      10197   lks32mc03x_mcpwm.o
@@ -1168,14 +1165,14 @@ Image component sizes
        174         18          0          0          0      11891   lks32mc03x_sys.o
        258          8          0          0          0       4032   lks32mc03x_timer.o
         56         14          0          4          0       1112   lks32mc03x_tmp.o
-        60         14          0          0          0      25163   main.o
-       896        166         12         88          0      11983   sgslave.o
+        60         14          0          0          0      37847   main.o
+       904        164         12         88          0      12123   sgslave.o
         68         32        192          0       1536        656   startup_lks32mc03x.o
 
     ----------------------------------------------------------------------
-      9430       1140      21908        172       2160     168496   Object Totals
+      9542       1134      21796        172       2160     161571   Object Totals
          0          0         32          0          0          0   (incl. Generated)
-        16          0      20925          2          0          0   (incl. Padding)
+        16          0      20813          2          0          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
@@ -1226,9 +1223,9 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     10348       1162      21908        172       2260     166368   Grand Totals
-     10348       1162      21908        172       2260     166368   ELF Image Totals
-     10348       1162      21908        172          0          0   ROM Totals
+     10460       1156      21796        172       2260     159487   Grand Totals
+     10460       1156      21796        172       2260     159487   ELF Image Totals
+     10460       1156      21796        172          0          0   ROM Totals
 
 ==============================================================================
 

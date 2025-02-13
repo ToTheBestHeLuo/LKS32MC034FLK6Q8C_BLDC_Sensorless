@@ -14,8 +14,9 @@ static const uint8_t slaveUniqueID[] = {'S','p','i','c','e','A','n','d','W','o',
 
 static uint8_t checkCnt = 0;
 static bool escReady = false;
-static int16_t minThrottle = -1200;
-static int16_t maxThrottle = +1200;
+
+int16_t minThrottle = -PWM_PERIOD_COUNT;
+int16_t maxThrottle = +PWM_PERIOD_COUNT;
 
 bool sG_ProtocolProcess(uint16_t* dataOut)
 {
@@ -30,8 +31,8 @@ bool sG_ProtocolProcess(uint16_t* dataOut)
 				if(!escReady){
 					if(checkCnt++ > 50){
 						checkCnt = 0;
-						minThrottle = motorFlashData.motorPar.motorDuty_Min * 12 - 1200;
-						maxThrottle = motorFlashData.motorPar.motorDuty_Max * 12 - 1200;
+						minThrottle = motorFlashData.motorPar.motorDuty_Min * PWM_GAIN * 2 - PWM_PERIOD_COUNT;
+						maxThrottle = motorFlashData.motorPar.motorDuty_Max * PWM_GAIN * 2 - PWM_PERIOD_COUNT;
 						escReady = true;
 					}
 				}else{
@@ -39,7 +40,7 @@ bool sG_ProtocolProcess(uint16_t* dataOut)
 						if(checkCnt++ > 100){
 							checkCnt = 0;
 							escReady = false;
-							bldcSysHandler.bldcSensorlessHandler.pwmCountTarget = -1200;
+							bldcSysHandler.bldcSensorlessHandler.pwmCountTarget = -PWM_PERIOD_COUNT;
 							sG.mode = esG_Slave_RepeatCmd;
 							BLDC_PWM_TurnOff();
 							bldcSysHandler.sysStatus = eBLDC_Sys_Reset;
@@ -47,7 +48,7 @@ bool sG_ProtocolProcess(uint16_t* dataOut)
 						}
 					}else if(bldcSysHandler.bldcSensorlessHandler.runMode == eBLDC_Run_Mode_COMP_INT){
 						/*油门数据将被正确执行*/
-						int16_t throttle = (int16_t)((int32_t)dataIn * 38437 / 32768 - 1200);
+						int16_t throttle = (int16_t)((int32_t)dataIn * 38437 / 32768 / PWM_GAIN2 - PWM_PERIOD_COUNT);
 						if(throttle < minThrottle){
 							throttle = minThrottle;
 						}else if(throttle > maxThrottle){

@@ -112,6 +112,9 @@ typedef struct{
 }sGHandler;
 
 extern sGHandler sG;
+extern int16_t minThrottle;
+extern int16_t maxThrottle;
+
 extern bool sG_ProtocolProcess(uint16_t* dataOut);
 extern void sG_TransmitWithDMA(uint16_t value);
 extern bool sG_ReceiveWithDMA(uint16_t* value);

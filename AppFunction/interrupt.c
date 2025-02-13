@@ -240,9 +240,7 @@ void SW_IRQHandler(void)
  *******************************************************************************/
 void CMP_IRQHandler(void)
 {	
-		GPIO_ResetBits(GPIO1,GPIO_Pin_6);
 		BLDC_ZeroCrossCompTask();
-		GPIO_SetBits(GPIO1,GPIO_Pin_6);
 }
 
 /*******************************************************************************

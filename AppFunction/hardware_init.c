@@ -202,6 +202,8 @@ void GPIO_init(void)
     GPIO_StructInit(&GPIO_InitStruct);
 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_6;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;  /*新版本不再使用内部上拉功能*/
+		GPIO_InitStruct.GPIO_PODEna = ENABLE;			/*使能开漏输出*/
     GPIO_Init(GPIO1, &GPIO_InitStruct);
 		GPIO_SetBits(GPIO1,GPIO_Pin_6);
 	
@@ -215,7 +217,7 @@ void GPIO_init(void)
     GPIO_StructInit(&GPIO_InitStruct);
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN; /*GPIO输入模式*/
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5;     /*P1.5*/
-    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;  /*上拉功能*/
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;  /*新版本不再使用内部上拉功能*/
 		GPIO_InitStruct.GPIO_PODEna = ENABLE;			/*使能开漏输出*/
     GPIO_Init(GPIO1, &GPIO_InitStruct);
     GPIO_PinAFConfig(GPIO1, GPIO_PinSource_5, AF8_TIMER1); /*IO复用UTIMER功能*/
@@ -257,7 +259,7 @@ void DAC_init(void)
 		DAC_StructInit(&DAC_InitStructure);
 		DAC_InitStructure.DACOUT_EN = DISABLE ;//禁止DAC电压通过P0.0输出
 		DAC_Init(&DAC_InitStructure);        /* DAC初始化 */
-		DAC_OutputVoltage((1.9f + 35.f / 0.5f * 0.01f) * BIT12);  /* DAC输出，每0.01V对应0.5A过流保护阈值*/
+		DAC_OutputVoltage((1.9f + 25.f / 0.5f * 0.01f) * BIT12);  /* DAC输出，每0.01V对应0.5A过流保护阈值*/
 }
 /*******************************************************************************
  函数名称：    void UTimer_init(void)
@@ -504,7 +506,7 @@ void MCPWM_init(void)
     MCPWM_InitStructure.TimeBase0_PERIOD = PWM_PERIOD;           /* 时期0周期设置 */
     MCPWM_InitStructure.TimeBase1_PERIOD = PWM_PERIOD;           /* 时期1周期设置 */
 		
-    MCPWM_InitStructure.TriggerPoint3 = (u16)(-1200); 		/* MCPWM_TMR3 触发事件T3 设置 */
+    MCPWM_InitStructure.TriggerPoint3 = (u16)(-PWM_PERIOD); 		/* MCPWM_TMR3 触发事件T3 设置 */
 		MCPWM_InitStructure.TMR3_TimeBase_Sel = 0;						/* 选择时基0作为TMR3事件的触发点*/ 
 		MCPWM_InitStructure.CNT0_T0_Update_INT_EN = ENABLE;	/* CNT0对应的更新中断使能 */
 
