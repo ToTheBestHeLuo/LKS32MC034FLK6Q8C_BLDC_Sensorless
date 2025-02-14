@@ -317,10 +317,10 @@ typedef struct{
 		BLDC_Sys_Error_Code sysErrorCode;
 		uint32_t lowSpeedCounter;
 		uint32_t highSpeedCounter;
+		uint32_t counter,counter1;
 		uint32_t switchPhaseMask;
 		BLDC_ADCSensorHandler adcSensorHandler;
 		BLDC_SensorlessHandler bldcSensorlessHandler;
-		uint16_t counter;
 }BLDC_SysHandler;
 
 typedef enum{
