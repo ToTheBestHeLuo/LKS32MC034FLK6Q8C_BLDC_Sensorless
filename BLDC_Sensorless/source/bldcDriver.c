@@ -15,7 +15,7 @@ const sG_MotorFlashUnion slave_MotorData_Sector __attribute__((at(sectorMotorFla
 		.motorDuty_Max = 200,
 		.motorDuty_Min = 50,
 		.motorBeepVolumeDuty = 20,
-		.motorStartupDuty = 17,
+		.motorStartupDuty = 20,
 		
 		.motorStartupInitialCycle = 250,
 		.motorStartupFinalCycle = 40,
@@ -33,7 +33,7 @@ const sG_MotorFlashUnion slave_MotorData_Sector __attribute__((at(sectorMotorFla
 		.motorRun_BlockThreshold = 100,
 		.motorRun_SpeedFilterPar1 = 1,
 		.motorRun_SpeedFilterPar3 = 6,
-		.motorRun_CWCCW = CW
+		.motorRun_CWCCW = CCW
 	}
 };
 
@@ -105,6 +105,7 @@ static void BLDC_LoadFlashData_Static(void)
 			BLDC_SwitchTable[3] = BLDC_SwitchTableCW[3];
 			BLDC_SwitchTable[4] = BLDC_SwitchTableCW[4];
 			BLDC_SwitchTable[5] = BLDC_SwitchTableCW[5];
+			bldcSysHandler.bldcSensorlessHandler.comparePolarity = true;
 		}else{
 			BLDC_SwitchTable[0] = BLDC_SwitchTableCCW[0];
 			BLDC_SwitchTable[1] = BLDC_SwitchTableCCW[1];
@@ -112,6 +113,7 @@ static void BLDC_LoadFlashData_Static(void)
 			BLDC_SwitchTable[3] = BLDC_SwitchTableCCW[3];
 			BLDC_SwitchTable[4] = BLDC_SwitchTableCCW[4];
 			BLDC_SwitchTable[5] = BLDC_SwitchTableCCW[5];
+			bldcSysHandler.bldcSensorlessHandler.comparePolarity = false;
 		}
 }
 /*******************************************************************************
@@ -335,20 +337,11 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 			case eBLDC_Run_OpenLoop:
 				commutation = BLDC_Run_Mode_COMP_Polling_Commutation();
 				if(commutation){
-					bldcSysHandler.counter1 = 0u;
 					bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
 					BLDC_SwitchTable[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)bldcSysHandler.bldcSensorlessHandler.pwmCount);
-				}else{
-					bldcSysHandler.counter1++;
-					if(bldcSysHandler.counter1 > 64){
-						bldcSysHandler.counter1 = 0u;
-						bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
-						BLDC_SwitchTable[bldcSysHandler.bldcSensorlessHandler.sector]((uint16_t)bldcSysHandler.bldcSensorlessHandler.pwmCount);
-					}
 				}
 				if(commutation && ++bldcSysHandler.counter >= 8u){
 					BLDC_HALL_ResetCounter();
-					bldcSysHandler.counter1 = 0u;
 					bldcSysHandler.counter = 0u;
 					bldcSysHandler.highSpeedCounter = 0u;
 					bldcSysHandler.bldcSensorlessHandler.runStatus = eBLDC_Run_ReadyForCloseLoop;
