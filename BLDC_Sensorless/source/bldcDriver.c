@@ -17,23 +17,23 @@ const sG_MotorFlashUnion slave_MotorData_Sector __attribute__((at(sectorMotorFla
 		.motorBeepVolumeDuty = 20,
 		.motorStartupDuty = 17,
 		
-		.motorStartupInitialCycle = 150,
-		.motorStartupFinalCycle = 40,
+		.motorStartupInitialCycle = 140,
+		.motorStartupFinalCycle = 80,
 		.motorStartupFixedCycle = 250,
 		
 		.motorStartupRotateStep = 250,
-		.motorStartup_ZC_Filter1 = 2,
+		.motorStartup_ZC_Filter1 = 1,
 		.motorStartup_ZC_Filter2 = 1,
-		.motorStartup_BlockThreshold = 15,
+		.motorStartup_BlockThreshold = 7,
 		
 		.motorRun_ZC_Filter1 = 5,
 		.motorRun_ZC_Filter2 = 1,
-		.mototRunThrottle_SpeedUpRate = 10,
-		.mototRunThrottle_SlowDownRate = 10,
+		.mototRunThrottle_SpeedUpRate = 3,
+		.mototRunThrottle_SlowDownRate = 3,
 		.motorRun_BlockThreshold = 100,
 		.motorRun_SpeedFilterPar1 = 1,
 		.motorRun_SpeedFilterPar3 = 6,
-		.motorRun_CWCCW = CW
+		.motorRun_CWCCW = CCW
 	}
 };
 
@@ -264,7 +264,7 @@ static bool BLDC_Run_Mode_COMP_Polling_Commutation(void)
 	
 		if(bldcSysHandler.bldcSensorlessHandler.comparePolarity != nowCompResult){
 			bldcSysHandler.highSpeedCounter++;
-			if(bldcSysHandler.highSpeedCounter > 8){
+			if(bldcSysHandler.highSpeedCounter > 4){
 				bldcSysHandler.highSpeedCounter = 0;
 				bldcSysHandler.bldcSensorlessHandler.comparePolarity = nowCompResult;
 				commutation = true;
@@ -315,7 +315,8 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 				break;
 			case eBLDC_Run_Alignment:
 				BLDC_SwitchTable[0]((uint16_t)bldcSysHandler.bldcSensorlessHandler.pwmCount);
-				if(bldcSysHandler.highSpeedCounter++ > bldcSysHandler.bldcSensorlessHandler.rotorFixedCycle * 3){
+				if(bldcSysHandler.highSpeedCounter++ > bldcSysHandler.bldcSensorlessHandler.rotorFixedCycle){
+					BLDC_COMP_SetFilter_Startup();
 					bldcSysHandler.highSpeedCounter = 0u;
 					bldcSysHandler.bldcSensorlessHandler.runStatus = eBLDC_Run_SpeedUp;
 				}
@@ -326,7 +327,6 @@ static void BLDC_Run_Mode_COMP_Polling(void)
 					bldcSysHandler.highSpeedCounter = 0u;
 					bldcSysHandler.bldcSensorlessHandler.sector = (bldcSysHandler.bldcSensorlessHandler.sector + 1) % 6;
 					if(bldcSysHandler.bldcSensorlessHandler.speedUpCycle-- < bldcSysHandler.bldcSensorlessHandler.speedUpFinalCycle){
-						BLDC_COMP_SetFilter_Startup();
 						bldcSysHandler.counter = 0u;
 						/*在这里打开电机的堵转保护功能*/
 						BLDC_HALL_SetThreshold_High();
