@@ -13,18 +13,18 @@ const sG_MotorFlashUnion slave_MotorData_Sector __attribute__((at(sectorMotorFla
 		.escID4 = 0x44,
 		
 		.motorDuty_Max = 200,
-		.motorDuty_Min = 50,
+		.motorDuty_Min = 20,
 		.motorBeepVolumeDuty = 20,
 		.motorStartupDuty = 17,
 		
-		.motorStartupInitialCycle = 140,
-		.motorStartupFinalCycle = 80,
+		.motorStartupInitialCycle = 200,
+		.motorStartupFinalCycle = 40,
 		.motorStartupFixedCycle = 250,
 		
 		.motorStartupRotateStep = 250,
-		.motorStartup_ZC_Filter1 = 1,
+		.motorStartup_ZC_Filter1 = 2,
 		.motorStartup_ZC_Filter2 = 1,
-		.motorStartup_BlockThreshold = 7,
+		.motorStartup_BlockThreshold = 5,
 		
 		.motorRun_ZC_Filter1 = 5,
 		.motorRun_ZC_Filter2 = 1,
@@ -105,7 +105,6 @@ static void BLDC_LoadFlashData_Static(void)
 			BLDC_SwitchTable[3] = BLDC_SwitchTableCW[3];
 			BLDC_SwitchTable[4] = BLDC_SwitchTableCW[4];
 			BLDC_SwitchTable[5] = BLDC_SwitchTableCW[5];
-			
 			bldcSysHandler.bldcSensorlessHandler.comparePolarity = true;
 		}else{
 			BLDC_SwitchTable[0] = BLDC_SwitchTableCCW[0];
@@ -114,9 +113,12 @@ static void BLDC_LoadFlashData_Static(void)
 			BLDC_SwitchTable[3] = BLDC_SwitchTableCCW[3];
 			BLDC_SwitchTable[4] = BLDC_SwitchTableCCW[4];
 			BLDC_SwitchTable[5] = BLDC_SwitchTableCCW[5];
-			
 			bldcSysHandler.bldcSensorlessHandler.comparePolarity = false;
 		}
+		
+		BLDC_COMP_Int_SetPolarity_High();
+		BLDC_HALL_SetThreshold_High();
+		BLDC_COMP_SetFilter_Startup();
 }
 /*******************************************************************************
  º¯ÊýÃû³Æ£º    bool BLDC_CheckFlashData_NoError(void)
